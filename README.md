@@ -100,8 +100,8 @@ cd movie-archive
 
 ## 👥 팀 소개
 
-**팀명: archimoo**
-Archive와 movie의 합성어
+**팀명: Archimoo**
+| Archive와 movie의 합성어
 
 | 이름 | 학번 | 역할 |
 |------|------|------|
