@@ -176,13 +176,6 @@ Movie Archive는 사용자가 감상한 영화를 체계적으로 기록하고, 
 | tags | id, name, created_at |
 | archive_tags | id, archive_id, tag_id |
 
-**관계(요약)**
-- users(1) : archives(N)
-- movies(1) : archives(N)
-- users(1) : reviews(N)
-- movies(1) : reviews(N)
-- archives(N) : tags(N) 는 `archive_tags`로 다대다 매핑
-
 ---
 
 ### 2.3 화면 설계 (Wireframe)
@@ -206,5 +199,3 @@ Movie Archive는 사용자가 감상한 영화를 체계적으로 기록하고, 
     - 내가 남긴 리뷰 모아보기
     - 태그로 분류/검색
 
-도구 예시
-- Figma, Kakao Oven, 직접 스케치 후 사진 첨부
