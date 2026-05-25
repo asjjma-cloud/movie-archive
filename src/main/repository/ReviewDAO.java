@@ -84,6 +84,18 @@ public class ReviewDAO {
         }
     }
 
+    // ID로 리뷰 조회
+    public Review findById(int id) throws SQLException {
+        String sql = "SELECT * FROM reviews WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return mapRow(rs);
+        }
+        return null;
+    }
+
     // ResultSet → Review 객체 변환
     private Review mapRow(ResultSet rs) throws SQLException {
         return new Review(
