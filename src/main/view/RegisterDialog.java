@@ -69,9 +69,13 @@ public class RegisterDialog extends JDialog {
                 JOptionPane.showMessageDialog(this, "모든 항목을 입력해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            authController.register(username, email, password, nickname);
-            JOptionPane.showMessageDialog(this, "회원가입이 완료되었습니다!", "성공", JOptionPane.INFORMATION_MESSAGE);
-            dispose();
+            boolean success = authController.register(username, email, password, nickname);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "회원가입이 완료되었습니다!", "성공", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "이미 사용 중인 아이디 또는 이메일입니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         panel.add(titleLabel);

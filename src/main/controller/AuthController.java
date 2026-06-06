@@ -11,12 +11,14 @@ public class AuthController {
     private User currentUser = null;
 
     // 회원가입
-    public void register(String username, String email, String password, String nickname) {
+    public boolean register(String username, String email, String password, String nickname) {
         try {
             userService.register(username, email, password, nickname);
             System.out.println("회원가입 성공!");
+            return true;
         } catch (IllegalArgumentException | SQLException e) {
             System.err.println("회원가입 실패: " + e.getMessage());
+            return false;
         }
     }
 

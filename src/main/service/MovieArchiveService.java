@@ -12,6 +12,11 @@ public class MovieArchiveService {
 
     // 회원가입
     public void register(String username, String email, String password, String nickname) throws SQLException {
+        // 아이디 중복 확인
+        if (userDAO.findByUsername(username) != null) {
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        }
+        // 이메일 중복 확인
         if (userDAO.findByEmail(email) != null) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }

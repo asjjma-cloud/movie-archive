@@ -188,6 +188,7 @@ public class MyPagePanel extends JPanel {
             if (!newNickname.isEmpty()) {
                 try {
                     new main.service.MovieArchiveService().updateProfile(user, newNickname, newPassword);
+                    mainFrame.updateUserLabel(); // 네비게이션 닉네임 실시간 갱신
                     JOptionPane.showMessageDialog(this, "수정되었습니다!", "성공", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "수정 실패: " + ex.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);

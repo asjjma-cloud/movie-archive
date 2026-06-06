@@ -23,11 +23,12 @@ public class UserDAO {
     }
 
     // 아이디로 조회
-    public User findById(int id) throws SQLException {
-        String sql = "SELECT * FROM users WHERE id = ?";
+    // 아이디로 조회
+    public User findByUsername(String username) throws SQLException {
+        String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
+            pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) return mapRow(rs);
         }

@@ -9,16 +9,16 @@ public class MainFrame extends JFrame {
 
     private static final Color BG_COLOR = new Color(245, 245, 245);
     private static final Color PANEL_COLOR = new Color(255, 255, 255);
-    private static final Color GOLD_COLOR = new Color(30, 30, 30);
+    private static final Color ACCENT_COLOR = new Color(30, 30, 30);
     private static final Color TEXT_COLOR = new Color(30, 30, 30);
     private static final Color HINT_COLOR = new Color(120, 120, 120);
-    private static final Color INPUT_BG = new Color(250, 250, 250);
     private static final Color BORDER_COLOR = new Color(220, 220, 220);
 
     private final AuthController authController;
     private final MovieController movieController = new MovieController();
 
     private JPanel contentPanel;
+    private JLabel userLabel; // 닉네임 라벨 필드로 분리
 
     public MainFrame(AuthController authController) {
         this.authController = authController;
@@ -34,18 +34,14 @@ public class MainFrame extends JFrame {
         getContentPane().setBackground(BG_COLOR);
         setLayout(new BorderLayout());
 
-        // 상단 네비게이션 바
         JPanel navBar = createNavBar();
         add(navBar, BorderLayout.NORTH);
 
-        // 콘텐츠 영역
         contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(BG_COLOR);
         add(contentPanel, BorderLayout.CENTER);
 
-        // 기본 화면: 영화 목록
         showMovieList();
-
         setVisible(true);
     }
 
@@ -57,18 +53,15 @@ public class MainFrame extends JFrame {
                 BorderFactory.createEmptyBorder(12, 20, 12, 20)
         ));
 
-        // 로고
         JLabel logo = new JLabel("🎬 Movie Archive");
         logo.setFont(new Font("Dialog", Font.BOLD, 16));
-        logo.setForeground(new Color(30, 30, 30));
+        logo.setForeground(ACCENT_COLOR);
 
-        // 버튼 영역
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         btnPanel.setBackground(PANEL_COLOR);
 
-        // 닉네임 표시
-        String nickname = authController.getCurrentUser().getNickname();
-        JLabel userLabel = new JLabel(nickname + " 님");
+        // 닉네임 라벨 필드로 분리
+        userLabel = new JLabel(authController.getCurrentUser().getNickname() + " 님");
         userLabel.setFont(new Font("Dialog", Font.PLAIN, 13));
         userLabel.setForeground(HINT_COLOR);
 
@@ -84,10 +77,9 @@ public class MainFrame extends JFrame {
         btnPanel.add(movieListBtn);
         btnPanel.add(myPageBtn);
 
-        // 관리자면 관리자 버튼 추가
         if (authController.isAdmin()) {
             JButton adminBtn = createNavButton("관리자");
-            adminBtn.setForeground(GOLD_COLOR);
+            adminBtn.setForeground(ACCENT_COLOR);
             adminBtn.addActionListener(e -> showAdminPanel());
             btnPanel.add(adminBtn);
         }
@@ -112,7 +104,13 @@ public class MainFrame extends JFrame {
         return btn;
     }
 
-    // 영화 목록 화면
+    // 닉네임 실시간 갱신 메서드
+    public void updateUserLabel() {
+        userLabel.setText(authController.getCurrentUser().getNickname() + " 님");
+        userLabel.revalidate();
+        userLabel.repaint();
+    }
+
     public void showMovieList() {
         contentPanel.removeAll();
         contentPanel.add(new MovieListPanel(authController, movieController, this), BorderLayout.CENTER);
@@ -120,15 +118,13 @@ public class MainFrame extends JFrame {
         contentPanel.repaint();
     }
 
-    // 내 보관함 화면
-    private void showMyPage() {
+    public void showMyPage() {
         contentPanel.removeAll();
         contentPanel.add(new MyPagePanel(authController, this), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
 
-    // 관리자 패널
     private void showAdminPanel() {
         contentPanel.removeAll();
         contentPanel.add(new AdminPanel(authController, movieController, this), BorderLayout.CENTER);
@@ -136,7 +132,6 @@ public class MainFrame extends JFrame {
         contentPanel.repaint();
     }
 
-    // 로그아웃
     private void handleLogout() {
         authController.logout();
         dispose();
