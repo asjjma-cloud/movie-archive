@@ -14,7 +14,11 @@ public class MovieService {
 
     // 전체 영화 조회
     public List<Movie> getAllMovies() throws SQLException {
-        return movieDAO.findAll();
+        List<Movie> movies = movieDAO.findAll();
+        for (Movie m : movies) {
+            m.setAverageRating(movieDAO.getAverageRating(m.getId()));
+        }
+        return movies;
     }
 
     // 영화 상세 조회

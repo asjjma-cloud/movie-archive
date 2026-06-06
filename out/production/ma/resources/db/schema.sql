@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS reviews (
                                        movie_id   INTEGER NOT NULL,
                                        rating     INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
     content    TEXT,
-    created_at TEXT    NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
     FOREIGN KEY (user_id)  REFERENCES users(id),
     FOREIGN KEY (movie_id) REFERENCES movies(id),
     UNIQUE (user_id, movie_id)

@@ -27,6 +27,7 @@ public class MovieDetailPanel extends JDialog {
     private final MainFrame mainFrame;
 
     private DefaultTableModel reviewTableModel;
+    private JLabel ratingLabel;
 
     public MovieDetailPanel(Movie movie, AuthController authController,
                             MovieController movieController, MainFrame mainFrame) {
@@ -74,14 +75,14 @@ public class MovieDetailPanel extends JDialog {
         metaLabel.setForeground(HINT_COLOR);
         metaLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel ratingLabel = new JLabel(
-                String.format("★ %.1f / 5.0", movie.getAverageRating())
-        );
+        ratingLabel = new JLabel(String.format("★ %.1f / 5.0", movie.getAverageRating()));
         ratingLabel.setFont(new Font("Dialog", Font.BOLD, 15));
         ratingLabel.setForeground(ACCENT_COLOR);
         ratingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JTextArea overviewArea = new JTextArea(movie.getOverview() != null ? movie.getOverview() : "줄거리 정보 없음");
+        JTextArea overviewArea = new JTextArea(
+                movie.getOverview() != null ? movie.getOverview() : "줄거리 정보 없음"
+        );
         overviewArea.setFont(new Font("Dialog", Font.PLAIN, 13));
         overviewArea.setForeground(TEXT_COLOR);
         overviewArea.setBackground(PANEL_COLOR);
@@ -156,26 +157,34 @@ public class MovieDetailPanel extends JDialog {
         JButton writeReviewBtn = new JButton("리뷰 작성");
         writeReviewBtn.setBackground(ACCENT_COLOR);
         writeReviewBtn.setForeground(Color.WHITE);
+        writeReviewBtn.setOpaque(true);
         writeReviewBtn.setFont(new Font("Dialog", Font.BOLD, 13));
         writeReviewBtn.setBorderPainted(false);
         writeReviewBtn.setFocusPainted(false);
-        writeReviewBtn.setOpaque(true);
         writeReviewBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         writeReviewBtn.addActionListener(e -> {
             new ReviewDialog(this, movie, authController, reviewController);
             loadReviews();
+            // 평균 별점 즉시 갱신
             Movie updated = movieController.getMovieDetail(movie.getId());
-            if (updated != null) movie.setAverageRating(updated.getAverageRating());
+            if (updated != null) {
+                movie.setAverageRating(updated.getAverageRating());
+                ratingLabel.setText(String.format("★ %.1f / 5.0", movie.getAverageRating()));
+            }
         });
 
         JButton closeBtn = new JButton("닫기");
         closeBtn.setBackground(new Color(245, 245, 245));
         closeBtn.setForeground(HINT_COLOR);
+        closeBtn.setOpaque(true);
         closeBtn.setFont(new Font("Dialog", Font.PLAIN, 13));
         closeBtn.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
         closeBtn.setFocusPainted(false);
         closeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        closeBtn.addActionListener(e -> dispose());
+        closeBtn.addActionListener(e -> {
+            dispose();
+            mainFrame.showMovieList(); // 닫을 때 영화 목록 갱신
+        });
 
         panel.add(writeReviewBtn);
         panel.add(closeBtn);
