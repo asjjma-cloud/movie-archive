@@ -7,7 +7,8 @@ import java.nio.file.Paths;
 
 public class DBConnection {
 
-    private static final String DB_URL = "jdbc:sqlite:resources/db/movie_archive.db";
+    private static final String DB_URL = "jdbc:sqlite:" +
+            System.getProperty("user.dir") + "/resources/db/movie_archive.db";
     private static Connection conn = null;
 
     public static Connection getConnection() throws SQLException {
