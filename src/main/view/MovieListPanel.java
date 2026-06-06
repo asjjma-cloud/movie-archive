@@ -6,6 +6,7 @@ import main.domain.Movie;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class MovieListPanel extends JPanel {
 
     private JTable movieTable;
     private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> sorter;
     private JTextField searchField;
     private JComboBox<String> genreCombo;
 
@@ -62,7 +64,6 @@ public class MovieListPanel extends JPanel {
 
         final JButton searchBtn = createAccentButton("검색");
 
-        // 엔터키로 검색
         searchField.addActionListener(e -> searchBtn.doClick());
 
         searchBtn.addActionListener(e -> {
@@ -108,20 +109,38 @@ public class MovieListPanel extends JPanel {
         topPanel.add(genreCombo);
         topPanel.add(allBtn);
 
+        // 테이블 모델
         String[] columns = {"ID", "제목", "감독", "장르", "개봉연도", "평균 별점"};
         tableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int row, int col) { return false; }
+
+            // 정렬 타입 지정
+            @Override
+            public Class<?> getColumnClass(int col) {
+                switch (col) {
+                    case 0: return Integer.class;  // ID
+                    case 4: return Integer.class;  // 개봉연도
+                    case 5: return Double.class;   // 평균 별점
+                    default: return String.class;
+                }
+            }
         };
 
         movieTable = new JTable(tableModel);
         styleTable(movieTable);
+
+        // 정렬 기능 추가
+        sorter = new TableRowSorter<>(tableModel);
+        movieTable.setRowSorter(sorter);
 
         movieTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int row = movieTable.getSelectedRow();
                     if (row >= 0) {
-                        int movieId = (int) tableModel.getValueAt(row, 0);
+                        // 정렬된 행 인덱스를 모델 인덱스로 변환
+                        int modelRow = movieTable.convertRowIndexToModel(row);
+                        int movieId = (int) tableModel.getValueAt(modelRow, 0);
                         Movie movie = movieController.getMovieDetail(movieId);
                         if (movie != null) {
                             new MovieDetailPanel(movie, authController, movieController, mainFrame);
@@ -139,7 +158,7 @@ public class MovieListPanel extends JPanel {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 8));
         bottomPanel.setBackground(PANEL_COLOR);
         bottomPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
-        bottomPanel.add(makeHintLabel("행을 더블클릭하면 상세 정보를 볼 수 있습니다"));
+        bottomPanel.add(makeHintLabel("행을 더블클릭하면 상세 정보를 볼 수 있습니다  |  컬럼 헤더를 클릭하면 정렬됩니다"));
 
         add(topPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
@@ -155,7 +174,7 @@ public class MovieListPanel extends JPanel {
                     m.getDirector(),
                     m.getGenre(),
                     m.getReleaseYear(),
-                    String.format("%.1f ★", m.getAverageRating())
+                    m.getAverageRating()
             });
         }
     }
@@ -173,7 +192,9 @@ public class MovieListPanel extends JPanel {
         table.getTableHeader().setForeground(HINT_COLOR);
         table.getTableHeader().setFont(new Font("Dialog", Font.PLAIN, 12));
         table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_COLOR));
+        table.getTableHeader().setReorderingAllowed(false);
 
+        // ID 컬럼 숨기기
         table.getColumnModel().getColumn(0).setMinWidth(0);
         table.getColumnModel().getColumn(0).setMaxWidth(0);
         table.getColumnModel().getColumn(0).setWidth(0);
@@ -183,11 +204,21 @@ public class MovieListPanel extends JPanel {
         table.getColumnModel().getColumn(4).setPreferredWidth(80);
         table.getColumnModel().getColumn(5).setPreferredWidth(80);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        centerRenderer.setBackground(new Color(255, 255, 255));
-        centerRenderer.setForeground(TEXT_COLOR);
-        table.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        // 별점 컬럼 렌더러 (소수점 1자리 + ★)
+        DefaultTableCellRenderer starRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public void setValue(Object value) {
+                if (value instanceof Double) {
+                    setText(String.format("%.1f ★", (Double) value));
+                } else {
+                    setText(value == null ? "" : value.toString());
+                }
+            }
+        };
+        starRenderer.setHorizontalAlignment(JLabel.CENTER);
+        starRenderer.setBackground(new Color(255, 255, 255));
+        starRenderer.setForeground(TEXT_COLOR);
+        table.getColumnModel().getColumn(5).setCellRenderer(starRenderer);
     }
 
     private void styleCombo(JComboBox<String> combo) {
