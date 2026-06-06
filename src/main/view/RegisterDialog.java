@@ -6,12 +6,13 @@ import java.awt.*;
 
 public class RegisterDialog extends JDialog {
 
-    private static final Color BG_COLOR = new Color(26, 26, 26);
-    private static final Color GOLD_COLOR = new Color(255, 215, 0);
-    private static final Color TEXT_COLOR = new Color(220, 220, 220);
+    private static final Color BG_COLOR = new Color(245, 245, 245);
+    private static final Color PANEL_COLOR = new Color(255, 255, 255);
+    private static final Color ACCENT_COLOR = new Color(30, 30, 30);
+    private static final Color TEXT_COLOR = new Color(30, 30, 30);
     private static final Color HINT_COLOR = new Color(120, 120, 120);
-    private static final Color INPUT_BG = new Color(40, 40, 40);
-    private static final Color BORDER_COLOR = new Color(60, 60, 60);
+    private static final Color INPUT_BG = new Color(250, 250, 250);
+    private static final Color BORDER_COLOR = new Color(220, 220, 220);
 
     private JTextField usernameField;
     private JTextField emailField;
@@ -33,7 +34,7 @@ public class RegisterDialog extends JDialog {
 
         JLabel titleLabel = new JLabel("회원가입");
         titleLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-        titleLabel.setForeground(GOLD_COLOR);
+        titleLabel.setForeground(ACCENT_COLOR);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         usernameField = new JTextField();
@@ -41,15 +42,23 @@ public class RegisterDialog extends JDialog {
         passwordField = new JPasswordField();
         nicknameField = new JTextField();
 
-        JButton registerBtn = new JButton("가입하기");
+        final JButton registerBtn = new JButton("가입하기");
         registerBtn.setMaximumSize(new Dimension(320, 38));
-        registerBtn.setBackground(GOLD_COLOR);
-        registerBtn.setForeground(Color.BLACK);
+        registerBtn.setBackground(ACCENT_COLOR);
+        registerBtn.setForeground(Color.WHITE);
+        registerBtn.setOpaque(true);
         registerBtn.setFont(new Font("Dialog", Font.BOLD, 13));
         registerBtn.setBorderPainted(false);
         registerBtn.setFocusPainted(false);
         registerBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         registerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // 엔터키로 가입
+        usernameField.addActionListener(e -> registerBtn.doClick());
+        emailField.addActionListener(e -> registerBtn.doClick());
+        passwordField.addActionListener(e -> registerBtn.doClick());
+        nicknameField.addActionListener(e -> registerBtn.doClick());
+
         registerBtn.addActionListener(e -> {
             String username = usernameField.getText().trim();
             String email = emailField.getText().trim();
@@ -101,7 +110,7 @@ public class RegisterDialog extends JDialog {
         field.setMaximumSize(new Dimension(320, 36));
         field.setBackground(INPUT_BG);
         field.setForeground(TEXT_COLOR);
-        field.setCaretColor(GOLD_COLOR);
+        field.setCaretColor(ACCENT_COLOR);
         field.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1),
                 BorderFactory.createEmptyBorder(4, 10, 4, 10)

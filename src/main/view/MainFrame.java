@@ -7,12 +7,13 @@ import java.awt.*;
 
 public class MainFrame extends JFrame {
 
-    private static final Color BG_COLOR = new Color(13, 13, 13);
-    private static final Color PANEL_COLOR = new Color(26, 26, 26);
-    private static final Color GOLD_COLOR = new Color(255, 215, 0);
-    private static final Color TEXT_COLOR = new Color(220, 220, 220);
+    private static final Color BG_COLOR = new Color(245, 245, 245);
+    private static final Color PANEL_COLOR = new Color(255, 255, 255);
+    private static final Color GOLD_COLOR = new Color(30, 30, 30);
+    private static final Color TEXT_COLOR = new Color(30, 30, 30);
     private static final Color HINT_COLOR = new Color(120, 120, 120);
-    private static final Color BORDER_COLOR = new Color(60, 60, 60);
+    private static final Color INPUT_BG = new Color(250, 250, 250);
+    private static final Color BORDER_COLOR = new Color(220, 220, 220);
 
     private final AuthController authController;
     private final MovieController movieController = new MovieController();
@@ -59,7 +60,7 @@ public class MainFrame extends JFrame {
         // 로고
         JLabel logo = new JLabel("🎬 Movie Archive");
         logo.setFont(new Font("Dialog", Font.BOLD, 16));
-        logo.setForeground(GOLD_COLOR);
+        logo.setForeground(new Color(30, 30, 30));
 
         // 버튼 영역
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -106,6 +107,7 @@ public class MainFrame extends JFrame {
         btn.setFont(new Font("Dialog", Font.PLAIN, 13));
         btn.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
         btn.setFocusPainted(false);
+        btn.setOpaque(true);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }

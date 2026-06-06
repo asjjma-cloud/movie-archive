@@ -85,6 +85,7 @@ public class ReviewDialog extends JDialog {
         saveBtn.setFont(new Font("Dialog", Font.BOLD, 13));
         saveBtn.setBorderPainted(false);
         saveBtn.setFocusPainted(false);
+        saveBtn.setOpaque(true);
         saveBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         saveBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         saveBtn.addActionListener(e -> {

@@ -12,13 +12,14 @@ import java.util.List;
 
 public class AdminPanel extends JPanel {
 
-    private static final Color BG_COLOR = new Color(13, 13, 13);
-    private static final Color PANEL_COLOR = new Color(26, 26, 26);
-    private static final Color GOLD_COLOR = new Color(255, 215, 0);
-    private static final Color TEXT_COLOR = new Color(220, 220, 220);
+    private static final Color BG_COLOR = new Color(245, 245, 245);
+    private static final Color PANEL_COLOR = new Color(255, 255, 255);
+    private static final Color ACCENT_COLOR = new Color(30, 30, 30);
+    private static final Color TEXT_COLOR = new Color(30, 30, 30);
     private static final Color HINT_COLOR = new Color(120, 120, 120);
-    private static final Color INPUT_BG = new Color(40, 40, 40);
-    private static final Color BORDER_COLOR = new Color(60, 60, 60);
+    private static final Color INPUT_BG = new Color(250, 250, 250);
+    private static final Color BORDER_COLOR = new Color(220, 220, 220);
+    private static final Color TABLE_SEL = new Color(220, 220, 220);
 
     private final AuthController authController;
     private final MovieController movieController;
@@ -41,7 +42,6 @@ public class AdminPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(BG_COLOR);
 
-        // 탭 패널
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(PANEL_COLOR);
         tabbedPane.setForeground(TEXT_COLOR);
@@ -56,12 +56,10 @@ public class AdminPanel extends JPanel {
         loadUsers();
     }
 
-    // 영화 관리 탭
     private JPanel createMovieTab() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG_COLOR);
 
-        // 테이블
         String[] columns = {"ID", "제목", "감독", "장르", "개봉연도"};
         movieTableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
@@ -69,21 +67,18 @@ public class AdminPanel extends JPanel {
 
         JTable movieTable = new JTable(movieTableModel);
         styleTable(movieTable);
-
-        // ID 컬럼 숨기기
         movieTable.getColumnModel().getColumn(0).setMinWidth(0);
         movieTable.getColumnModel().getColumn(0).setMaxWidth(0);
 
         JScrollPane scrollPane = new JScrollPane(movieTable);
-        scrollPane.getViewport().setBackground(new Color(20, 20, 20));
+        scrollPane.getViewport().setBackground(new Color(255, 255, 255));
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // 하단 버튼
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         btnPanel.setBackground(PANEL_COLOR);
         btnPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        JButton addBtn = createGoldButton("영화 추가");
+        JButton addBtn = createAccentButton("영화 추가");
         JButton deleteBtn = createGhostButton("영화 삭제");
 
         addBtn.addActionListener(e -> openAddMovieDialog());
@@ -112,7 +107,6 @@ public class AdminPanel extends JPanel {
         return panel;
     }
 
-    // 회원 관리 탭
     private JPanel createUserTab() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG_COLOR);
@@ -124,16 +118,13 @@ public class AdminPanel extends JPanel {
 
         JTable userTable = new JTable(userTableModel);
         styleTable(userTable);
-
-        // ID 컬럼 숨기기
         userTable.getColumnModel().getColumn(0).setMinWidth(0);
         userTable.getColumnModel().getColumn(0).setMaxWidth(0);
 
         JScrollPane scrollPane = new JScrollPane(userTable);
-        scrollPane.getViewport().setBackground(new Color(20, 20, 20));
+        scrollPane.getViewport().setBackground(new Color(255, 255, 255));
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // 하단 버튼
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         btnPanel.setBackground(PANEL_COLOR);
         btnPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
@@ -170,7 +161,6 @@ public class AdminPanel extends JPanel {
         return panel;
     }
 
-    // 영화 추가 다이얼로그
     private void openAddMovieDialog() {
         JTextField titleField = new JTextField();
         JTextField directorField = new JTextField();
@@ -248,25 +238,26 @@ public class AdminPanel extends JPanel {
     }
 
     private void styleTable(JTable table) {
-        table.setBackground(new Color(20, 20, 20));
+        table.setBackground(new Color(255, 255, 255));
         table.setForeground(TEXT_COLOR);
         table.setFont(new Font("Dialog", Font.PLAIN, 13));
         table.setRowHeight(32);
         table.setShowGrid(false);
-        table.setSelectionBackground(new Color(50, 50, 20));
-        table.setSelectionForeground(GOLD_COLOR);
+        table.setSelectionBackground(TABLE_SEL);
+        table.setSelectionForeground(TEXT_COLOR);
         table.getTableHeader().setBackground(PANEL_COLOR);
         table.getTableHeader().setForeground(HINT_COLOR);
         table.getTableHeader().setFont(new Font("Dialog", Font.PLAIN, 12));
     }
 
-    private JButton createGoldButton(String text) {
+    private JButton createAccentButton(String text) {
         JButton btn = new JButton(text);
-        btn.setBackground(GOLD_COLOR);
-        btn.setForeground(Color.BLACK);
+        btn.setBackground(ACCENT_COLOR);
+        btn.setForeground(Color.WHITE);
         btn.setFont(new Font("Dialog", Font.BOLD, 13));
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
+        btn.setOpaque(true);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }
@@ -278,6 +269,7 @@ public class AdminPanel extends JPanel {
         btn.setFont(new Font("Dialog", Font.PLAIN, 13));
         btn.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
         btn.setFocusPainted(false);
+        btn.setOpaque(true);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }

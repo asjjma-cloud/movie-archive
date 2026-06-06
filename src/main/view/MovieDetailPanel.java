@@ -12,12 +12,13 @@ import java.util.List;
 
 public class MovieDetailPanel extends JDialog {
 
-    private static final Color BG_COLOR = new Color(13, 13, 13);
-    private static final Color PANEL_COLOR = new Color(26, 26, 26);
-    private static final Color GOLD_COLOR = new Color(255, 215, 0);
-    private static final Color TEXT_COLOR = new Color(220, 220, 220);
+    private static final Color BG_COLOR = new Color(245, 245, 245);
+    private static final Color PANEL_COLOR = new Color(255, 255, 255);
+    private static final Color ACCENT_COLOR = new Color(30, 30, 30);
+    private static final Color TEXT_COLOR = new Color(30, 30, 30);
     private static final Color HINT_COLOR = new Color(120, 120, 120);
-    private static final Color BORDER_COLOR = new Color(60, 60, 60);
+    private static final Color BORDER_COLOR = new Color(220, 220, 220);
+    private static final Color TABLE_SEL = new Color(220, 220, 220);
 
     private final Movie movie;
     private final AuthController authController;
@@ -44,17 +45,9 @@ public class MovieDetailPanel extends JDialog {
         getContentPane().setBackground(BG_COLOR);
         setLayout(new BorderLayout());
 
-        // 상단 영화 정보
-        JPanel infoPanel = createInfoPanel();
-        add(infoPanel, BorderLayout.NORTH);
-
-        // 리뷰 목록
-        JPanel reviewPanel = createReviewPanel();
-        add(reviewPanel, BorderLayout.CENTER);
-
-        // 하단 버튼
-        JPanel bottomPanel = createBottomPanel();
-        add(bottomPanel, BorderLayout.SOUTH);
+        add(createInfoPanel(), BorderLayout.NORTH);
+        add(createReviewPanel(), BorderLayout.CENTER);
+        add(createBottomPanel(), BorderLayout.SOUTH);
 
         loadReviews();
         setVisible(true);
@@ -69,13 +62,11 @@ public class MovieDetailPanel extends JDialog {
                 BorderFactory.createEmptyBorder(20, 24, 20, 24)
         ));
 
-        // 제목
         JLabel titleLabel = new JLabel(movie.getTitle());
         titleLabel.setFont(new Font("Dialog", Font.BOLD, 20));
-        titleLabel.setForeground(GOLD_COLOR);
+        titleLabel.setForeground(ACCENT_COLOR);
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // 감독 · 장르 · 개봉연도
         JLabel metaLabel = new JLabel(
                 movie.getDirector() + "  ·  " + movie.getGenre() + "  ·  " + movie.getReleaseYear()
         );
@@ -83,15 +74,13 @@ public class MovieDetailPanel extends JDialog {
         metaLabel.setForeground(HINT_COLOR);
         metaLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // 평균 별점
         JLabel ratingLabel = new JLabel(
                 String.format("★ %.1f / 5.0", movie.getAverageRating())
         );
         ratingLabel.setFont(new Font("Dialog", Font.BOLD, 15));
-        ratingLabel.setForeground(GOLD_COLOR);
+        ratingLabel.setForeground(ACCENT_COLOR);
         ratingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // 줄거리
         JTextArea overviewArea = new JTextArea(movie.getOverview() != null ? movie.getOverview() : "줄거리 정보 없음");
         overviewArea.setFont(new Font("Dialog", Font.PLAIN, 13));
         overviewArea.setForeground(TEXT_COLOR);
@@ -117,7 +106,6 @@ public class MovieDetailPanel extends JDialog {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG_COLOR);
 
-        // 리뷰 헤더
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 10));
         headerPanel.setBackground(BG_COLOR);
         JLabel reviewTitle = new JLabel("리뷰");
@@ -125,25 +113,23 @@ public class MovieDetailPanel extends JDialog {
         reviewTitle.setForeground(TEXT_COLOR);
         headerPanel.add(reviewTitle);
 
-        // 리뷰 테이블
         String[] columns = {"ID", "작성자 ID", "별점", "내용", "작성일"};
         reviewTableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
 
         JTable reviewTable = new JTable(reviewTableModel);
-        reviewTable.setBackground(new Color(20, 20, 20));
+        reviewTable.setBackground(new Color(255, 255, 255));
         reviewTable.setForeground(TEXT_COLOR);
         reviewTable.setFont(new Font("Dialog", Font.PLAIN, 13));
         reviewTable.setRowHeight(32);
         reviewTable.setShowGrid(false);
-        reviewTable.setSelectionBackground(new Color(50, 50, 20));
-        reviewTable.setSelectionForeground(GOLD_COLOR);
+        reviewTable.setSelectionBackground(TABLE_SEL);
+        reviewTable.setSelectionForeground(TEXT_COLOR);
         reviewTable.getTableHeader().setBackground(PANEL_COLOR);
         reviewTable.getTableHeader().setForeground(HINT_COLOR);
         reviewTable.getTableHeader().setFont(new Font("Dialog", Font.PLAIN, 12));
 
-        // ID 컬럼 숨기기
         reviewTable.getColumnModel().getColumn(0).setMinWidth(0);
         reviewTable.getColumnModel().getColumn(0).setMaxWidth(0);
         reviewTable.getColumnModel().getColumn(1).setMinWidth(0);
@@ -153,7 +139,7 @@ public class MovieDetailPanel extends JDialog {
         reviewTable.getColumnModel().getColumn(4).setPreferredWidth(120);
 
         JScrollPane scrollPane = new JScrollPane(reviewTable);
-        scrollPane.getViewport().setBackground(new Color(20, 20, 20));
+        scrollPane.getViewport().setBackground(new Color(255, 255, 255));
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         panel.add(headerPanel, BorderLayout.NORTH);
@@ -168,22 +154,22 @@ public class MovieDetailPanel extends JDialog {
         panel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
         JButton writeReviewBtn = new JButton("리뷰 작성");
-        writeReviewBtn.setBackground(GOLD_COLOR);
-        writeReviewBtn.setForeground(Color.BLACK);
+        writeReviewBtn.setBackground(ACCENT_COLOR);
+        writeReviewBtn.setForeground(Color.WHITE);
         writeReviewBtn.setFont(new Font("Dialog", Font.BOLD, 13));
         writeReviewBtn.setBorderPainted(false);
         writeReviewBtn.setFocusPainted(false);
+        writeReviewBtn.setOpaque(true);
         writeReviewBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         writeReviewBtn.addActionListener(e -> {
             new ReviewDialog(this, movie, authController, reviewController);
             loadReviews();
-            // 평균 별점 갱신
             Movie updated = movieController.getMovieDetail(movie.getId());
             if (updated != null) movie.setAverageRating(updated.getAverageRating());
         });
 
         JButton closeBtn = new JButton("닫기");
-        closeBtn.setBackground(new Color(40, 40, 40));
+        closeBtn.setBackground(new Color(245, 245, 245));
         closeBtn.setForeground(HINT_COLOR);
         closeBtn.setFont(new Font("Dialog", Font.PLAIN, 13));
         closeBtn.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));

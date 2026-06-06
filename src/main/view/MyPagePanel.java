@@ -11,13 +11,14 @@ import java.util.List;
 
 public class MyPagePanel extends JPanel {
 
-    private static final Color BG_COLOR = new Color(13, 13, 13);
-    private static final Color PANEL_COLOR = new Color(26, 26, 26);
-    private static final Color GOLD_COLOR = new Color(255, 215, 0);
-    private static final Color TEXT_COLOR = new Color(220, 220, 220);
+    private static final Color BG_COLOR = new Color(245, 245, 245);
+    private static final Color PANEL_COLOR = new Color(255, 255, 255);
+    private static final Color ACCENT_COLOR = new Color(30, 30, 30);
+    private static final Color TEXT_COLOR = new Color(30, 30, 30);
     private static final Color HINT_COLOR = new Color(120, 120, 120);
-    private static final Color INPUT_BG = new Color(40, 40, 40);
-    private static final Color BORDER_COLOR = new Color(60, 60, 60);
+    private static final Color INPUT_BG = new Color(250, 250, 250);
+    private static final Color BORDER_COLOR = new Color(220, 220, 220);
+    private static final Color TABLE_SEL = new Color(220, 220, 220);
 
     private final AuthController authController;
     private final MainFrame mainFrame;
@@ -35,14 +36,8 @@ public class MyPagePanel extends JPanel {
     private void initUI() {
         setLayout(new BorderLayout());
         setBackground(BG_COLOR);
-
-        // 상단 프로필 영역
-        JPanel profilePanel = createProfilePanel();
-        add(profilePanel, BorderLayout.NORTH);
-
-        // 내 리뷰 목록
-        JPanel reviewPanel = createReviewPanel();
-        add(reviewPanel, BorderLayout.CENTER);
+        add(createProfilePanel(), BorderLayout.NORTH);
+        add(createReviewPanel(), BorderLayout.CENTER);
     }
 
     private JPanel createProfilePanel() {
@@ -58,7 +53,7 @@ public class MyPagePanel extends JPanel {
 
         JLabel nicknameLabel = new JLabel(user.getNickname());
         nicknameLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-        nicknameLabel.setForeground(GOLD_COLOR);
+        nicknameLabel.setForeground(ACCENT_COLOR);
         nicknameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel emailLabel = new JLabel(user.getEmail());
@@ -66,7 +61,6 @@ public class MyPagePanel extends JPanel {
         emailLabel.setForeground(HINT_COLOR);
         emailLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // 버튼 영역
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 8));
         btnPanel.setBackground(PANEL_COLOR);
         btnPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -108,18 +102,17 @@ public class MyPagePanel extends JPanel {
         };
 
         JTable reviewTable = new JTable(reviewTableModel);
-        reviewTable.setBackground(new Color(20, 20, 20));
+        reviewTable.setBackground(new Color(255, 255, 255));
         reviewTable.setForeground(TEXT_COLOR);
         reviewTable.setFont(new Font("Dialog", Font.PLAIN, 13));
         reviewTable.setRowHeight(32);
         reviewTable.setShowGrid(false);
-        reviewTable.setSelectionBackground(new Color(50, 50, 20));
-        reviewTable.setSelectionForeground(GOLD_COLOR);
+        reviewTable.setSelectionBackground(TABLE_SEL);
+        reviewTable.setSelectionForeground(TEXT_COLOR);
         reviewTable.getTableHeader().setBackground(PANEL_COLOR);
         reviewTable.getTableHeader().setForeground(HINT_COLOR);
         reviewTable.getTableHeader().setFont(new Font("Dialog", Font.PLAIN, 12));
 
-        // ID 컬럼 숨기기
         reviewTable.getColumnModel().getColumn(0).setMinWidth(0);
         reviewTable.getColumnModel().getColumn(0).setMaxWidth(0);
         reviewTable.getColumnModel().getColumn(1).setMinWidth(0);
@@ -128,7 +121,6 @@ public class MyPagePanel extends JPanel {
         reviewTable.getColumnModel().getColumn(3).setPreferredWidth(400);
         reviewTable.getColumnModel().getColumn(4).setPreferredWidth(120);
 
-        // 더블클릭 → 리뷰 수정/삭제
         reviewTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() == 2) {
@@ -146,7 +138,7 @@ public class MyPagePanel extends JPanel {
         });
 
         JScrollPane scrollPane = new JScrollPane(reviewTable);
-        scrollPane.getViewport().setBackground(new Color(20, 20, 20));
+        scrollPane.getViewport().setBackground(new Color(255, 255, 255));
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         panel.add(headerPanel, BorderLayout.NORTH);
@@ -170,23 +162,19 @@ public class MyPagePanel extends JPanel {
         }
     }
 
-    // 정보 수정 다이얼로그
     private void openEditDialog() {
         User user = authController.getCurrentUser();
 
         JTextField nicknameField = new JTextField(user.getNickname());
         JPasswordField passwordField = new JPasswordField();
-        styleInput(nicknameField);
-        styleInput(passwordField);
 
         JPanel editPanel = new JPanel();
         editPanel.setLayout(new BoxLayout(editPanel, BoxLayout.Y_AXIS));
-        editPanel.setBackground(PANEL_COLOR);
-        editPanel.add(makeLabel("닉네임"));
+        editPanel.add(new JLabel("닉네임"));
         editPanel.add(Box.createVerticalStrut(4));
         editPanel.add(nicknameField);
         editPanel.add(Box.createVerticalStrut(10));
-        editPanel.add(makeLabel("새 비밀번호 (변경 시만 입력)"));
+        editPanel.add(new JLabel("새 비밀번호 (변경 시만 입력)"));
         editPanel.add(Box.createVerticalStrut(4));
         editPanel.add(passwordField);
 
@@ -208,7 +196,6 @@ public class MyPagePanel extends JPanel {
         }
     }
 
-    // 리뷰 수정/삭제 다이얼로그
     private void openEditReviewDialog(int reviewId, int rating, String content) {
         JSlider ratingSlider = new JSlider(1, 5, rating);
         ratingSlider.setMajorTickSpacing(1);
@@ -254,26 +241,6 @@ public class MyPagePanel extends JPanel {
             mainFrame.dispose();
             new LoginFrame();
         }
-    }
-
-    private JTextField styleInput(JTextField field) {
-        field.setMaximumSize(new Dimension(300, 36));
-        field.setBackground(INPUT_BG);
-        field.setForeground(TEXT_COLOR);
-        field.setCaretColor(GOLD_COLOR);
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER_COLOR, 1),
-                BorderFactory.createEmptyBorder(4, 10, 4, 10)
-        ));
-        field.setFont(new Font("Dialog", Font.PLAIN, 13));
-        return field;
-    }
-
-    private JLabel makeLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setFont(new Font("Dialog", Font.PLAIN, 12));
-        label.setForeground(HINT_COLOR);
-        return label;
     }
 
     private JButton createGhostButton(String text) {
