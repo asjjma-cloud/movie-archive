@@ -48,7 +48,19 @@ public class ReviewDAO {
         return reviews;
     }
 
-    // 중복 리뷰 확인 (한 유저가 같은 영화에 리뷰 하나만)
+    // ID로 리뷰 조회
+    public Review findById(int id) throws SQLException {
+        String sql = "SELECT * FROM reviews WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return mapRow(rs);
+        }
+        return null;
+    }
+
+    // 중복 리뷰 확인
     public boolean exists(int userId, int movieId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM reviews WHERE user_id = ? AND movie_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -64,7 +76,7 @@ public class ReviewDAO {
     // 리뷰 수정
     public void update(Review review) throws SQLException {
         String sql = "UPDATE reviews SET rating = ?, content = ?, " +
-                "updated_at = datetime('now') WHERE id = ?";
+                "updated_at = datetime('now', '+9 hours') WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, review.getRating());
@@ -84,16 +96,14 @@ public class ReviewDAO {
         }
     }
 
-    // ID로 리뷰 조회
-    public Review findById(int id) throws SQLException {
-        String sql = "SELECT * FROM reviews WHERE id = ?";
+    // 유저의 모든 리뷰 삭제 (회원 탈퇴 시)
+    public void deleteByUserId(int userId) throws SQLException {
+        String sql = "DELETE FROM reviews WHERE user_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) return mapRow(rs);
+            pstmt.setInt(1, userId);
+            pstmt.executeUpdate();
         }
-        return null;
     }
 
     // ResultSet → Review 객체 변환

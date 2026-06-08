@@ -1,6 +1,7 @@
 package main.service;
 
 import main.domain.User;
+import main.repository.ReviewDAO;
 import main.repository.UserDAO;
 import main.util.PasswordUtil;
 
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 public class MovieArchiveService {
 
     private final UserDAO userDAO = new UserDAO();
+    private final ReviewDAO reviewDAO = new ReviewDAO();
 
     // 회원가입
     public void register(String username, String email, String password, String nickname) throws SQLException {
@@ -51,6 +53,9 @@ public class MovieArchiveService {
 
     // 회원 탈퇴
     public void deactivate(int userId) throws SQLException {
+        // 유저 리뷰 먼저 삭제
+        reviewDAO.deleteByUserId(userId);
+        // 회원 탈퇴 (소프트 삭제)
         userDAO.deactivate(userId);
     }
 }
