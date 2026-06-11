@@ -1,6 +1,7 @@
 ---
-layout: default
-title: 05. Testing Optimization
+marp: true
+theme: default
+paginate: true
 ---
 
 # 05. Testing & Optimization
@@ -13,6 +14,8 @@ title: 05. Testing Optimization
 | 통합 테스트 | 전체 기능 흐름 시나리오 테스트 |
 | UI 테스트 | 화면 동작 및 이벤트 처리 확인 |
 
+---
+
 ## 🔐 회원 인증 테스트
 
 | 테스트 항목 | 결과 |
@@ -23,6 +26,8 @@ title: 05. Testing Optimization
 | 틀린 비밀번호 로그인 → 오류 메시지 | ✅ |
 | 탈퇴 계정 로그인 → 차단 | ✅ |
 | 로그아웃 → 로그인 화면 이동 | ✅ |
+
+---
 
 ## 🎥 영화 조회 테스트
 
@@ -36,6 +41,8 @@ title: 05. Testing Optimization
 | 전체보기 버튼 → 목록 초기화 | ✅ |
 | 영화 더블클릭 → 상세 화면 | ✅ |
 
+---
+
 ## ⭐ 리뷰 테스트
 
 | 테스트 항목 | 결과 |
@@ -47,6 +54,8 @@ title: 05. Testing Optimization
 | 리뷰 수정 → 반영 확인 | ✅ |
 | 리뷰 삭제 → 목록에서 제거 | ✅ |
 
+---
+
 ## 👤 마이페이지 테스트
 
 | 테스트 항목 | 결과 |
@@ -55,6 +64,8 @@ title: 05. Testing Optimization
 | 비밀번호 수정 → 변경된 비밀번호로 로그인 | ✅ |
 | 회원 탈퇴 → 리뷰 자동 삭제 | ✅ |
 | 회원 탈퇴 → 로그인 화면 이동 | ✅ |
+
+---
 
 ## 🛡 관리자 테스트
 
@@ -66,22 +77,24 @@ title: 05. Testing Optimization
 | 전체 회원 목록 조회 | ✅ |
 | 회원 계정 정지 | ✅ |
 
+---
+
 ## 발견된 버그 및 수정 내역
 
 | 버그 | 원인 | 해결 |
 |------|------|------|
-| DB 두 곳에 생성 | 상대경로 사용 | System.getProperty("user.dir") 절대경로 적용 |
-| 평균 별점 미갱신 | 목록 새로고침 누락 | 리뷰 작성·닫기 시 showMovieList() 호출 |
-| 작성일 시간 오류 | UTC 기준 저장 | datetime('now', '+9 hours') KST 적용 |
+| DB 두 곳에 생성 | 상대경로 사용 | 절대경로 적용 |
+| 평균 별점 미갱신 | 목록 새로고침 누락 | showMovieList() 호출 |
+| 작성일 시간 오류 | UTC 기준 저장 | KST +9시간 적용 |
 | 중복 아이디 가입 | username 검증 누락 | findByUsername() 추가 |
-| 닉네임 미갱신 | 로그아웃 필요 | updateUserLabel() 실시간 갱신 |
+| 닉네임 미갱신 | 로그아웃 필요 | updateUserLabel() 추가 |
+
+---
 
 ## 최적화 내역
 
 | 항목 | 내용 |
 |------|------|
-| DB 인덱스 | title, genre, director, movie_id, user_id 인덱스 설정 |
-| 싱글톤 커넥션 | DBConnection 단일 인스턴스로 연결 관리 |
+| DB 인덱스 | title, genre, director, movie_id, user_id |
+| 싱글톤 커넥션 | DBConnection 단일 인스턴스 관리 |
 | 평균 별점 | getAllMovies() 호출 시 AVG 쿼리 일괄 처리 |
-
-[← 목차로](index.html)

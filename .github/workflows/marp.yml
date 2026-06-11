@@ -1,0 +1,24 @@
+name: Deploy Marp Slides
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Convert Marp to HTML
+        uses: docker://marpteam/marp-cli:latest
+        with:
+          args: --html --input-dir docs/slides/ --output docs/output/
+        env:
+          MARP_USER: root
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/output

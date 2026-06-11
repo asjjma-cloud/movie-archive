@@ -1,11 +1,15 @@
 ---
-layout: default
-title: 06. Source Directory
+marp: true
+theme: default
+paginate: true
 ---
 
 # 06. Source Directory
 
 ## 전체 프로젝트 구조
+
+---
+
 ## 패키지별 역할
 
 | 패키지 | 역할 |
@@ -16,5 +20,3 @@ title: 06. Source Directory
 | service | 비즈니스 로직 |
 | view | Java Swing UI |
 | util | 공통 유틸 |
-
-[← 목차로](index.html)

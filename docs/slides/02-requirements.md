@@ -1,11 +1,12 @@
 ---
-layout: default
-title: 02. Requirements Analysis
+marp: true
+theme: default
+paginate: true
 ---
 
 # 02. Requirements Analysis
 
-## 기능 요구사항
+## 기능 요구사항 (1/2)
 
 | ID | 기능 | 담당 |
 |----|------|------|
@@ -19,6 +20,13 @@ title: 02. Requirements Analysis
 | F-08 | 평균 별점 표시 | 최영재 |
 | F-09 | 리뷰 작성 | 최영재 |
 | F-10 | 리뷰 수정 | 최영재 |
+
+---
+
+## 기능 요구사항 (2/2)
+
+| ID | 기능 | 담당 |
+|----|------|------|
 | F-11 | 리뷰 삭제 | 최영재 |
 | F-12 | 리뷰 목록 조회 | 최영재 |
 | F-13 | 내 리뷰 모아보기 | 최영재 |
@@ -28,6 +36,8 @@ title: 02. Requirements Analysis
 | F-17 | 영화 등록·수정·삭제 | 최영재 |
 | F-18 | 회원 목록·권한 관리 | 최영재 |
 | F-19 | 화면 UI 구현 | 남하경 |
+
+---
 
 ## 비기능 요구사항
 
@@ -39,10 +49,10 @@ title: 02. Requirements Analysis
 | NF-04 | 시간 | 한국 시간(KST) 기준 저장 |
 | NF-05 | 성능 | 검색 인덱스 적용 |
 
+---
+
 ## 구현 완료 현황
 
 ✅ F-01 ~ F-19 **19개 기능 전부 구현 완료**
 
 ✅ NF-01 ~ NF-05 **비기능 요구사항 전부 충족**
-
-[← 목차로](index.html)

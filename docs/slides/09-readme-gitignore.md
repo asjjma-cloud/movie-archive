@@ -1,6 +1,7 @@
 ---
-layout: default
-title: 09. Readme & Gitignore
+marp: true
+theme: default
+paginate: true
 ---
 
 # 09. Readme & Gitignore
@@ -10,7 +11,9 @@ title: 09. Readme & Gitignore
 README.md는 프로젝트의 첫 인상입니다.
 GitHub 레포 접속 시 자동으로 표시됩니다.
 
-### 주요 구성 항목
+---
+
+## README.md 주요 항목
 
 | 항목 | 내용 |
 |------|------|
@@ -24,13 +27,20 @@ GitHub 레포 접속 시 자동으로 표시됩니다.
 | 개발 일정 | 주차별 일정 |
 | 팀 소개 | 팀원 및 역할 |
 
+---
+
 ## README.md 링크
 
 [📄 README.md 보기](https://github.com/asjjma-cloud/movie-archive/blob/main/README.md)
 
+---
+
 ## .gitignore 구성
 
 .gitignore는 Git 추적에서 제외할 파일을 지정합니다.
+
+---
+
 ## .gitignore 적용 이유
 
 | 항목 | 이유 |
@@ -41,13 +51,13 @@ GitHub 레포 접속 시 자동으로 표시됩니다.
 | `movie_archive.db` | 로컬 DB 데이터 (개인 데이터 포함) |
 | `.DS_Store` | macOS 시스템 파일 |
 
+---
+
 ## GitHub 레포지토리
 
 | 항목 | 내용 |
 |------|------|
-| 레포 주소 | [asjjma-cloud/movie-archive](https://github.com/asjjma-cloud/movie-archive) |
+| 레포 주소 | asjjma-cloud/movie-archive |
 | 브랜치 | main |
 | Issues | F-01 ~ F-19 전부 Closed |
-| Pages | [GitHub Pages](https://asjjma-cloud.github.io/movie-archive/slides/index.html) |
-
-[← 목차로](index.html)
+| Pages | asjjma-cloud.github.io/movie-archive |

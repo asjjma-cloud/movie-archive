@@ -1,6 +1,7 @@
 ---
-layout: default
-title: 08. Collaborators
+marp: true
+theme: default
+paginate: true
 ---
 
 # 08. Collaborators
@@ -11,12 +12,16 @@ title: 08. Collaborators
 
 영화 감상 기록을 아카이빙한다는 의미를 담았습니다.
 
+---
+
 ## 팀원 소개
 
 | 이름 | 학번 | 역할 |
 |------|------|------|
 | 👑 최영재 (팀장) | 20220519 | 백엔드·DB 설계·테스트 |
 | 남하경 | 20240609 | 프론트엔드·Controller·테스트 |
+
+---
 
 ## 최영재 담당 파트
 
@@ -30,6 +35,8 @@ title: 08. Collaborators
 - SHA-256 암호화 (`PasswordUtil`)
 - 단위 테스트 및 버그 수정
 
+---
+
 ## 남하경 담당 파트
 
 **프론트엔드 · Controller · 테스트**
@@ -42,19 +49,25 @@ title: 08. Collaborators
 - 통합 테스트
 - 문서 작성
 
+---
+
 ## 협업 방식
 
 | 항목 | 내용 |
 |------|------|
-| 소스 관리 | GitHub (`asjjma-cloud/movie-archive`) |
-| 브랜치 전략 | `main` / `feature/{기능명}` |
-| 커밋 규칙 | `[feat]`, `[fix]`, `[docs]` 접두사 사용 |
+| 소스 관리 | GitHub (asjjma-cloud/movie-archive) |
+| 브랜치 전략 | main / feature/{기능명} |
+| 커밋 규칙 | [feat], [fix], [docs] 접두사 사용 |
 | 소통 | Discord 또는 대면 |
 | 이슈 관리 | GitHub Issues (F-01 ~ F-19) |
+
+---
 
 ## GitHub Issues 완료 현황
 
 ✅ F-01 ~ F-19 **19개 이슈 전부 Closed**
+
+---
 
 ## 프로젝트 회고
 
@@ -67,10 +80,10 @@ title: 08. Collaborators
 - 팔로우·피드 기능 미구현 (향후 개발 예정)
 - 로컬 DB라 실시간 다중 사용자 연동 불가
 
+---
+
 ## 향후 개발 계획
 
 - 팔로우 / 피드 기능 구현
 - MySQL 서버 전환 (실시간 연동)
 - Spring Boot REST API 마이그레이션
-
-[← 목차로](index.html)

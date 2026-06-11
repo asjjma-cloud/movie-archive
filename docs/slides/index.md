@@ -1,6 +1,7 @@
 ---
-layout: default
-title: Movie Archive
+marp: true
+theme: default
+paginate: false
 ---
 
 # 🎬 Movie Archive
