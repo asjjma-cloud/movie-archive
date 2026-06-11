@@ -2,8 +2,6 @@
 marp: true
 theme: default
 paginate: true
-style: |
-  table { font-size: 0.65em; }
 ---
 
 # 02. Requirements Analysis
