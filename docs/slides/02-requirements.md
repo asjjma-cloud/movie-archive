@@ -1,12 +1,16 @@
+cat > docs/slides/02-requirements.md << 'EOF'
 ---
 marp: true
 theme: default
 paginate: true
+style: |
+table { font-size: 0.7em; }
+h2 { font-size: 1.2em; }
 ---
 
 # 02. Requirements Analysis
 
-## 기능 요구사항 (1/2)
+## 기능 요구사항
 
 | ID | 기능 | 담당 |
 |----|------|------|
@@ -20,13 +24,6 @@ paginate: true
 | F-08 | 평균 별점 표시 | 최영재 |
 | F-09 | 리뷰 작성 | 최영재 |
 | F-10 | 리뷰 수정 | 최영재 |
-
----
-
-## 기능 요구사항 (2/2)
-
-| ID | 기능 | 담당 |
-|----|------|------|
 | F-11 | 리뷰 삭제 | 최영재 |
 | F-12 | 리뷰 목록 조회 | 최영재 |
 | F-13 | 내 리뷰 모아보기 | 최영재 |
@@ -56,3 +53,4 @@ paginate: true
 ✅ F-01 ~ F-19 **19개 기능 전부 구현 완료**
 
 ✅ NF-01 ~ NF-05 **비기능 요구사항 전부 충족**
+EOF
