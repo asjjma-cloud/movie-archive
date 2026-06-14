@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Movie Archive 프로젝트 제안서 — 05 테스트 최적화</title>
+    <style>
+        /* ==========================================================================
+           1. Marp 프레젠테이션 엔진 코어 스타일 (Bespoke 아키텍처)
+           ========================================================================== */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a; /* Slate 900 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* 슬라이드 parent 컨테이너 */
+        .bespoke-marp-parent {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #020617; /* Slate 950 */
+        }
+
+        /* 개별 슬라이드 규격 (Marp 표준 16:9 뷰포트 고정) */
+        .bespoke-marp-slide {
+            position: absolute;
+            width: 1280px;
+            height: 720px;
+            box-sizing: border-box;
+            padding: 40px 60px;
+            background-color: #ffffff;
+            color: #1e293b;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* 활성화된 슬라이드 상태 */
+        .bespoke-marp-slide.bespoke-marp-active {
+            display: flex;
+        }
+
+        /* 하단 페이지네이션 번호 */
+        .slide-footer {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            background: #ffffff;
+            padding: 2px 8px;
+            z-index: 999;
+        }
+
+        /* ==========================================================================
+           2. Marp 순정 하단 네비게이션 컨트롤 바 (OSC) 디자인
+           ========================================================================== */
+        .marp-osc {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 9999;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            user-select: none;
+        }
+        .marp-osc-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .marp-osc-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        .marp-osc-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .marp-osc-text {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* ==========================================================================
+           3. 사용자 정의 타이포그래피 및 테이블 스타일 디자인
+           ========================================================================== */
+        h1 {
+            font-size: 26px;
+            font-weight: bold;
+            color: #0f172a;
+            border-bottom: none;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 17px;
+            font-weight: bold;
+            color: #0284c7; /* 오션 블루 메인 테마색 */
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+        p, li {
+            font-size: 13.5px;
+            line-height: 1.45;
+            color: #334155;
+            text-align: left;
+        }
+        blockquote {
+            background: transparent;
+            border-left: 4px solid #0284c7;
+            padding-left: 16px;
+            margin: 20px 0;
+            color: #475569;
+            font-style: italic;
+            font-size: 18px;
+        }
+
+        /* 📊 가독성을 극대화한 시원시원한 크기의 표 스타일 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2px 0;
+            font-size: 15px; /* 글자 크기를 큼직하게 유지 */
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            text-align: left;
+            vertical-align: middle;
+            line-height: 1.45;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: bold;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f1f5f9;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #0f172a;
+        }
+        pre {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 6px 0;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 13.5px;
+        }
+
+        /* 상하 분리형 마진 구분선 */
+        .section-divider {
+            margin-top: 20px;
+        }
+
+        /* 대제목 표지 슬라이드 전용 스타일 */
+        .slide-cover {
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 160px;
+        }
+        .slide-cover h2 {
+            color: #0284c7;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .slide-cover h1 {
+            color: #1e293b;
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+        .slide-cover blockquote {
+            border-left: 4px solid #0284c7;
+            color: #475569;
+            font-size: 20px;
+            max-width: 800px;
+            margin: 0;
+        }
+
+        .tip-box {
+            background-color: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+
+        /* ==========================================================================
+           4. Marp Overview (전체 개요 보기) 대시보드 모드 스타일
+           ========================================================================== */
+        .bespoke-marp-overview {
+            overflow-y: auto !important;
+            background-color: #0f172a !important;
+            padding: 40px !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)) !important;
+            gap: 24px !important;
+        }
+        .bespoke-marp-overview .bespoke-marp-slide {
+            display: flex !important;
+            position: relative !important;
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 16 / 9 !important;
+            padding: 15px 25px !important;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        .bespoke-marp-overview .bespoke-marp-slide h1 { font-size: 15px; margin-bottom: 6px; }
+        .bespoke-marp-overview .bespoke-marp-slide h2 { font-size: 11px; margin-top: 0; margin-bottom: 4px; }
+        .bespoke-marp-overview .bespoke-marp-slide p,
+        .bespoke-marp-overview .bespoke-marp-slide td,
+        .bespoke-marp-overview .bespoke-marp-slide th { font-size: 8px; line-height: 1.2; }
+        .bespoke-marp-overview .bespoke-marp-slide th { font-size: 8.5px; }
+        .bespoke-marp-overview .bespoke-marp-slide blockquote { font-size: 9px; padding-left: 6px; margin: 4px 0;}
+        .bespoke-marp-overview .bespoke-marp-slide table { margin: 2px 0; }
+        .bespoke-marp-overview .bespoke-marp-slide th,
+        .bespoke-marp-overview .bespoke-marp-slide td { padding: 3px 4px; }
+        .bespoke-marp-overview .bespoke-marp-slide .tip-box { padding: 4px 6px; margin-top: 2px;}
+        .bespoke-marp-overview .bespoke-marp-slide pre { padding: 4px; margin: 2px 0; }
+        .bespoke-marp-overview .bespoke-marp-slide code { font-size: 7.5px; }
+        .bespoke-marp-overview .bespoke-marp-slide.bespoke-marp-active {
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+<div class="bespoke-marp-parent" id="slideParent">
+
+    <section class="bespoke-marp-slide slide-cover">
+        <h2># 6 — 소스 디렉토리</h2>
+        <h1>📁 Source Directory</h1>
+
+        <blockquote>
+            Movie Archive 프로젝트의 패키지 구조와 역할
+        </blockquote>
+
+        <div class="slide-footer">1 / 4</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>6 — 소스 디렉토리</h1>
+
+        <div class="tree-container">
+            <div class="tree-column">
+<pre><code>movie-archive/
+│
+├── README.md
+├── docs/
+│   ├── 0_project_overview/
+│   ├── 1_requirement_analysis/
+│   ├── 2_project_structure/
+│   ├── 3_feature_implementation/
+│   ├── 4_summary/
+│   └── 5_testing_optimization/
+│
+├── src/
+│   └── main/
+│       ├── controller/
+│       │   ├── AuthController.java    # 로그인·회원가입 요청 처리
+│       │   ├── MovieController.java   # 영화 조회 및 검색 처리
+│       │   └── ReviewController.java  # 리뷰 작성·수정·삭제 처리
+│       │
+│       ├── domain/
+│       │   ├── Movie.java    # 영화 정보 객체
+│       │   ├── User.java     # 회원 정보 객체
+│       │   └── Review.java   # 리뷰 정보 객체
+│       │
+</code></pre>
+            </div>
+        </div>
+
+        <div class="slide-footer">2 / 4</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>6 — 소스 디렉토리</h1>
+
+        <div class="tree-container">
+            <div class="tree-column">
+<pre><code>│       │
+│       │   ├── repository/
+│       │   ├── MovieDAO.java      # 영화 CRUD 및 검색
+│       │   ├── UserDAO.java       # 회원 정보 및 로그인 조회
+│       │   └── ReviewDAO.java     # 리뷰 관리 및 중복 검사
+│       │
+│       ├── service/
+│       │   ├── MovieArchiveService.java  # 영화 관련 비즈니스 로직
+│       │   ├── MovieService.java         # 회원 기능 처리
+│       │   └── ReviewService.java        # 리뷰 기능 처리
+│       │
+│       ├── view/
+│       │   ├── LoginFrame.java        # 로그인 화면
+│       │   ├── MainFrame.java         # 메인 화면
+│       │   ├── MovieListPanel.java    # 영화 목록 화면
+│       │   ├── MovieDetailPanel.java  # 영화 상세 정보
+│       │   ├── MyPagePanel.java       # 내 보관함 화면
+│       │   └── AdminPanel.java        # 관리자 기능 화면
+│       │
+│       └── util/
+│           ├── DBConnection.java  # JDBC 커넥션 관리
+│           └── PasswordUtil.java  # SHA-256 해시
+│
+└── resources/
+    └── db/
+        ├── schema.sql         # DB 초기화 스크립트
+        └── movie_archive.db   # SQLite 데이터베이스 파일
+</code></pre>
+            </div>
+        </div>
+
+        <div class="slide-footer">3 / 4</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>6 — 패키지 역할</h1>
+
+        <table class="schedule-table">
+            <thead>
+            <tr>
+                <th>폴더</th>
+                <th>내용</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr>
+                <td><code>controller</code></td>
+                <td>UI 이벤트 처리</td>
+            </tr>
+            <tr>
+                <td><code>domain</code></td>
+                <td>User, Movie, Review 객체</td>
+            </tr>
+            <tr>
+                <td><code>repository</code></td>
+                <td>DB CRUD(SQL) 담당</td>
+            </tr>
+            <tr>
+                <td><code>service</code></td>
+                <td>비즈니스 로직 처리</td>
+            </tr>
+            <tr>
+                <td><code>util</code></td>
+                <td>DB 연결 및 암호화 기능</td>
+            </tr>
+            <tr>
+                <td><code>Main.java</code></td>
+                <td>프로그램 시작점</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="slide-footer">4 / 4</div>
+    </section>
+
+</div>
+
+<div class="marp-osc">
+    <button class="marp-osc-btn" id="oscPrev" title="이전 슬라이드">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="marp-osc-text" id="oscPageText">Page 1 of 4</span>
+    <button class="marp-osc-btn" id="oscNext" title="다음 슬라이드">
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button class="marp-osc-btn" id="oscFull" title="전체 화면 토글">
+        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+    <button class="marp-osc-btn" id="oscOverview" title="전체 개요 보기 (O)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    </button>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        const parentContainer = document.getElementById('slideParent');
+        const slideElements = Array.from(parentContainer.getElementsByClassName('bespoke-marp-slide'));
+        const oscPageText = document.getElementById('oscPageText');
+        let activeIndex = 0;
+        let overviewMode = false;
+
+        function renderState() {
+            slideElements.forEach((slide, index) => {
+                if (index === activeIndex) {
+                    slide.classList.add('bespoke-marp-active');
+                    if (overviewMode) slide.focus();
+                } else {
+                    slide.classList.remove('bespoke-marp-active');
+                }
+            });
+            if (oscPageText) {
+                oscPageText.textContent = `Page ${activeIndex + 1} of ${slideElements.length}`;
+            }
+        }
+
+        function navigateNext() {
+            if (activeIndex < slideElements.length - 1) {
+                activeIndex++;
+                renderState();
+            }
+        }
+
+        function navigatePrev() {
+            if (activeIndex > 0) {
+                activeIndex--;
+                renderState();
+            }
+        }
+
+        function toggleOverviewMode() {
+            overviewMode = !overviewMode;
+            if (overviewMode) {
+                parentContainer.classList.add('bespoke-marp-overview');
+            } else {
+                parentContainer.classList.remove('bespoke-marp-overview');
+            }
+            renderState();
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.getElementById('oscPrev').addEventListener('click', navigatePrev);
+        document.getElementById('oscNext').addEventListener('click', navigateNext);
+        document.getElementById('oscOverview').addEventListener('click', toggleOverviewMode);
+        document.getElementById('oscFull').addEventListener('click', toggleFullScreen);
+
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'ArrowRight': case 'Space': case 'PageDown':
+                    event.preventDefault(); navigateNext(); break;
+                case 'ArrowLeft': case 'PageUp':
+                    event.preventDefault(); navigatePrev(); break;
+                case 'Home':
+                    event.preventDefault(); activeIndex = 0; renderState(); break;
+                case 'End':
+                    event.preventDefault(); activeIndex = slideElements.length - 1; renderState(); break;
+                case 'o': case 'O': case 'Escape':
+                    event.preventDefault(); toggleOverviewMode(); break;
+            }
+        });
+
+        let lastScrollTimestamp = Date.now();
+        parentContainer.addEventListener('wheel', function(event) {
+            const currentTimestamp = Date.now();
+            if (currentTimestamp - lastScrollTimestamp < 250) return;
+
+            if (event.deltaY > 0) {
+                navigateNext(); lastScrollTimestamp = currentTimestamp;
+            } else if (event.deltaY < 0) {
+                navigatePrev(); lastScrollTimestamp = currentTimestamp;
+            }
+        });
+
+        slideElements.forEach((slide, mapIndex) => {
+            slide.addEventListener('click', function() {
+                if (overviewMode) {
+                    activeIndex = mapIndex; toggleOverviewMode();
+                }
+            });
+        });
+
+        renderState();
+    })();
+</script>
+</body>
+</html>

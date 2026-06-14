@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Archive</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: 92vh;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0 0 24px 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        li {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            min-height: 0;
+        }
+
+        li:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+
+        li a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 24px;
+            box-sizing: border-box;
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        li a::after {
+            content: "→";
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        li:hover a::after {
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Movie Archive</h1>
+    <p class="subtitle">영화 리뷰 저장소</p>
+
+    <ul>
+        <li><a href="01-project-overview.html">01. Project Overview</a></li>
+        <li><a href="02-requirements-analysis.html">02. Requirements Analysis</a></li>
+        <li><a href="03-project-structure.html">03. Project Structure</a></li>
+        <li><a href="04-feature-implementation.html">04. Feature Implementation</a></li>
+        <li><a href="05-testing-optimization.html">05. Testing Optimization</a></li>
+        <li><a href="06-source-directory.html">06. Source Directory</a></li>
+        <li><a href="07-release.html">07. Release</a></li>
+        <li><a href="08-collaborators.html">08. Collaborators</a></li>
+        <li><a href="09-readme-gitignore.html">09. Readme Gitignore</a></li>
+    </ul>
+</div>
+
+</body>
+</html>

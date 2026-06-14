@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Movie Archive 요구사항 분석 및 설계</title>
+    <style>
+        /* ==========================================================================
+           1. Marp 프레젠테이션 엔진 코어 스타일 (Bespoke 아키텍처)
+           ========================================================================== */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a; /* Slate 900 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* 슬라이드 parent 컨테이너 */
+        .bespoke-marp-parent {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #020617; /* Slate 950 */
+        }
+
+        /* 개별 슬라이드 규격 (Marp 표준 16:9 뷰포트 고정 및 SVG 가상화 시뮬레이션) */
+        .bespoke-marp-slide {
+            position: absolute;
+            width: 1280px;
+            height: 720px;
+            box-sizing: border-box;
+            padding: 60px 90px;
+            background-color: #ffffff;
+            color: #1e293b;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* 활성화된 슬라이드 상태 */
+        .bespoke-marp-slide.bespoke-marp-active {
+            display: flex;
+        }
+
+        /* 하단 페이지네이션 번호 */
+        .slide-footer {
+            position: absolute;
+            bottom: 40px;
+            right: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            z-index: 10;
+        }
+
+        /* ==========================================================================
+           2. Marp 순정 하단 네비게이션 컨트롤 바 (OSC) 디자인
+           ========================================================================== */
+        .marp-osc {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 9999;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            user-select: none;
+        }
+        .marp-osc-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .marp-osc-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        .marp-osc-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .marp-osc-text {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* ==========================================================================
+           3. 사용자 정의 타이포그래피 스타일
+           ========================================================================== */
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0f172a;    /* Slate 900 */
+            border-bottom: none;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0f172a;    /* Slate 900 */
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        p, li {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #334155;    /* Slate 700 */
+            text-align: justify;
+        }
+        ul {
+            margin-top: 0;
+            margin-left: 20px;
+            margin-bottom: 16px;
+            padding-left: 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        blockquote {
+            background: transparent;
+            border-left: 4px solid #cbd5e1; /* Slate 300 */
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #64748b;    /* Slate 500 */
+            font-style: italic;
+        }
+
+        /* ==========================================================================
+           4. 테이블 및 컴포넌트 추가 확장 디자인
+           ========================================================================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px; /* 요구사항 텍스트 밀도 대응을 위해 14px 최적화 */
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: bold;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+
+        /* 특정 컬럼 정렬 및 강조 가독성 스펙 정의 */
+        td.center, th.center {
+            text-align: center;
+        }
+        td.badge {
+            font-weight: 600;
+        }
+        td.high { color: #ef4444; }    /* 높은 우선순위: Red */
+        td.medium { color: #f59e0b; }  /* 중간 우선순위: Amber */
+        td.low { color: #10b981; }     /* 낮은 우선순위: Emerald */
+
+        /* 다단 레이아웃 분할 배정 구조 */
+        .split-container {
+            display: flex;
+            gap: 40px;
+            margin-top: 10px;
+        }
+        .split-column {
+            flex: 1;
+        }
+
+        /* 아키텍처 박스 모델 정의 */
+        .diagram-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #0f172a;
+            margin: 20px 0;
+            letter-spacing: 1px;
+        }
+
+        /* 대제목 표지 슬라이드 전용 데코레이션 스타일 */
+        .slide-cover {
+            background: #ffffff;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 120px;
+        }
+        .slide-cover h1 {
+            color: #0f172a;
+            font-size: 52px;
+            margin-bottom: 10px;
+        }
+        .slide-cover h2 {
+            color: #0284c7;
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+        .slide-cover blockquote {
+            border-left-color: #0284c7;
+            color: #475569;
+            font-size: 18px;
+            max-width: 800px;
+        }
+
+        /* ==========================================================================
+           5. Marp Overview (전체 개요 보기) 대시보드 모드 스타일
+           ========================================================================== */
+        .bespoke-marp-overview {
+            overflow-y: auto !important;
+            background-color: #0f172a !important;
+            padding: 50px !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)) !important;
+            gap: 30px !important;
+        }
+        .bespoke-marp-overview .bespoke-marp-slide {
+            display: flex !important;
+            position: relative !important;
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 16 / 9 !important;
+            padding: 25px 35px !important;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        /* 개요 모드 내 폰트 다운스케일링 */
+        .bespoke-marp-overview .bespoke-marp-slide h1 { font-size: 18px; margin-bottom: 10px; }
+        .bespoke-marp-overview .bespoke-marp-slide h2 { font-size: 13px; margin-top: 8px; margin-bottom: 4px; }
+        .bespoke-marp-overview .bespoke-marp-slide p,
+        .bespoke-marp-overview .bespoke-marp-slide li,
+        .bespoke-marp-overview .bespoke-marp-slide td,
+        .bespoke-marp-overview .bespoke-marp-slide th { font-size: 9px; line-height: 1.3; }
+        .bespoke-marp-overview .bespoke-marp-slide blockquote { font-size: 10px; padding-left: 8px; margin: 8px 0;}
+        .bespoke-marp-overview .bespoke-marp-slide table { margin: 5px 0; }
+        .bespoke-marp-overview .bespoke-marp-slide th,
+        .bespoke-marp-overview .bespoke-marp-slide td { padding: 4px 6px; }
+        .bespoke-marp-overview .bespoke-marp-slide .diagram-box { padding: 8px; font-size: 10px; margin: 6px 0; }
+        .bespoke-marp-overview .bespoke-marp-slide .split-container { gap: 15px; }
+        .bespoke-marp-overview .bespoke-marp-slide.bespoke-marp-active {
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+<div class="bespoke-marp-parent" id="slideParent">
+
+    <section class="bespoke-marp-slide slide-cover">
+        <h2># 2 — 요구사항 분석 및 설계</h2>
+        <h1>📋 Requirements Analysis</h1>
+        <blockquote>
+            Movie Archive 서비스 구축을 위한 기능적·비기능적 요구사항 정의 및 도메인 아키텍처 모델링
+        </blockquote>
+        <div class="slide-footer">1 / 6</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>2 — 요구사항 분석 및 설계</h1>
+        <h2>기능적 요구사항 (F-01 ~ F-06)</h2>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 10%;" class="center">ID</th>
+                <th style="width: 20%;">요구사항</th>
+                <th style="width: 58%;">상세 내용</th>
+                <th style="width: 12%;" class="center">우선순위</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="center"><strong>F-01</strong></td>
+                <td><strong>회원가입</strong></td>
+                <td>JTextField 기반 가입 폼 구성, 중복 아이디 DB 검증 및 비밀번호 SHA-256 해시 저장</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-02</strong></td>
+                <td><strong>로그인 / 로그아웃</strong></td>
+                <td>LoginFrame UI 구성, DB 연동 자격 증명 확인 및 세션 초기화 처리</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-03</strong></td>
+                <td><strong>내 정보 수정</strong></td>
+                <td>현재 비밀번호 검증 후 닉네임 및 비밀번호 DB 업데이트 로직 구현</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-04</strong></td>
+                <td><strong>회원 탈퇴</strong></td>
+                <td>계정 삭제 처리 및 연관된 리뷰 데이터를 삭제하는 트랜잭션 로직 수행</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-05</strong></td>
+                <td><strong>영화 목록 조회</strong></td>
+                <td>JTable을 이용해 제목·장르·연도·평균별점 표시 및 목록 전체 조회 쿼리 구현</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-06</strong></td>
+                <td><strong>영화 상세 보기</strong></td>
+                <td>상세 패널 구성(감독, 줄거리, 포스터 이미지), 영화 ID 기반 단건 조회 구현</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="slide-footer">2 / 6</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>2 — 요구사항 분석 및 설계</h1>
+        <h2>기능적 요구사항 (F-07 ~ F-12)</h2>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 10%;" class="center">ID</th>
+                <th style="width: 20%;">요구사항</th>
+                <th style="width: 58%;">상세 내용</th>
+                <th style="width: 12%;" class="center">우선순위</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="center"><strong>F-07</strong></td>
+                <td><strong>장르별 필터링</strong></td>
+                <td>JComboBox로 장르 선택 시 목록을 즉시 갱신하는 필터링 쿼리 적용</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-08</strong></td>
+                <td><strong>평균 별점 표시</strong></td>
+                <td>SQL AVG 함수를 활용하여 영화 목록 및 상세 화면에 실시간 평균 별점 노출</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-09</strong></td>
+                <td><strong>리뷰 작성</strong></td>
+                <td>JSlider(별점)와 JTextArea를 활용한 작성 폼 및 로그인 상태 검증 후 DB 저장</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-10</strong></td>
+                <td><strong>리뷰 수정</strong></td>
+                <td>기존 내용 불러오기 기능 및 작성자 본인 확인 후 DB 업데이트 처리</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-11</strong></td>
+                <td><strong>리뷰 삭제</strong></td>
+                <td>본인 또는 관리자 권한 확인 후 선택한 리뷰 데이터 삭제 쿼리 실행</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-12</strong></td>
+                <td><strong>리뷰 목록 조회</strong></td>
+                <td>특정 영화에 달린 리뷰(닉네임, 별점, 내용 등) 전체를 상세 화면에 출력</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="slide-footer">3 / 6</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>2 — 요구사항 분석 및 설계</h1>
+        <h2>기능적 요구사항 (F-13 ~ F-18)</h2>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 10%;" class="center">ID</th>
+                <th style="width: 20%;">요구사항</th>
+                <th style="width: 58%;">상세 내용</th>
+                <th style="width: 12%;" class="center">우선순위</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="center"><strong>F-13</strong></td>
+                <td><strong>내 리뷰 모아보기</strong></td>
+                <td>마이페이지 패널에서 로그인한 사용자가 작성한 리뷰들만 JTable로 집계</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-14</strong></td>
+                <td><strong>중복 리뷰 방지</strong></td>
+                <td>동일 영화에 대한 중복 리뷰 여부를 사전 조회하여 중복 시 안내 메시지 처리</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-15</strong></td>
+                <td><strong>영화 제목 검색</strong></td>
+                <td>LIKE 쿼리를 활용하여 제목 일부 입력 시 관련 영화 목록 즉시 갱신</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-16</strong></td>
+                <td><strong>감독 검색</strong></td>
+                <td>감독 이름 검색 입력을 통한 조건별 영화 검색 기능 구현</td>
+                <td class="center badge low">낮음</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-17</strong></td>
+                <td><strong>영화 관리 (관리자)</strong></td>
+                <td>관리자 전용 패널을 통한 영화 등록·수정·삭제 CRUD 및 권한 확인 로직</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>F-18</strong></td>
+                <td><strong>회원 및 권한 관리</strong></td>
+                <td>회원 목록 조회, 계정 정지 및 권한 변경 등 관리자 전용 제어 기능</td>
+                <td class="center badge low">낮음</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="slide-footer">4 / 6</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>2 — 요구사항 분석 및 설계</h1>
+        <h2>비기능적 요구사항 (Non-Functional)</h2>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 12%;" class="center">ID</th>
+                <th style="width: 20%;">요구사항</th>
+                <th style="width: 56%;">상세 내용</th>
+                <th style="width: 12%;" class="center">우선순위</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="center"><strong>NF-01</strong></td>
+                <td><strong>데이터 무결성</strong></td>
+                <td>사용자가 삭제될 경우 해당 사용자의 영화 및 리뷰 데이터도 연쇄 처리되어야 한다.</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>NF-02</strong></td>
+                <td><strong>보안성</strong></td>
+                <td>사용자의 비밀번호는 암호화하여 저장하며, 본인 외에는 리뷰 수정을 제한한다.</td>
+                <td class="center badge high">높음</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>NF-03</strong></td>
+                <td><strong>유지보수성</strong></td>
+                <td>Domain, Repository, Service 계층을 분리하여 코드 수정이 용이하게 설계한다.</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>NF-04</strong></td>
+                <td><strong>호환성</strong></td>
+                <td>MySQL과 SQLite 등 다양한 DB 환경에서도 시스템이 정상 작동해야 한다.</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            <tr>
+                <td class="center"><strong>NF-05</strong></td>
+                <td><strong>성능</strong></td>
+                <td>대량의 리뷰 데이터 조회 시에도 지연 시간이 최소화되도록 인덱스를 설계한다.</td>
+                <td class="center badge medium">중간</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="slide-footer">5 / 6</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>2 — 요구사항 분석 및 설계</h1>
+
+        <div class="split-container">
+            <div class="split-column">
+                <h2>아키텍처 다이어그램</h2>
+                <div class="diagram-box">
+                    [사용자] ➔ [View / UI] ➔ [Controller] ➔ [Service] ➔ [DB]
+                </div>
+                <ul style="font-size: 14px;">
+                    <li><strong>사용자</strong>: 아카이브 및 리뷰 컨트롤 주체</li>
+                    <li><strong>View/UI</strong>: Java Swing 기반 윈도우 인터페이스</li>
+                    <li><strong>Controller</strong>: 라우팅, 인증 상태 제어 및 검증</li>
+                    <li><strong>Service</strong>: 트랜잭션 단위 비즈니스 로직 처리</li>
+                    <li><strong>DB</strong>: SQLite 임베디드 관계형 데이터 영속화</li>
+                </ul>
+            </div>
+
+            <div class="split-column">
+                <h2>데이터베이스 설계 (스키마)</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width: 35%;">테이블명</th>
+                        <th style="width: 65%;">주요 컬럼 구성</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>users</strong></td>
+                        <td>id, name, email, password, created_at</td>
+                    </tr>
+                    <tr>
+                        <td><strong>movies</strong></td>
+                        <td>id, title, original_title, ... poster_url</td>
+                    </tr>
+                    <tr>
+                        <td><strong>archives</strong></td>
+                        <td>id, user_id, movie_id, status, watched_at</td>
+                    </tr>
+                    <tr>
+                        <td><strong>reviews</strong></td>
+                        <td>id, user_id, movie_id, rating, content</td>
+                    </tr>
+                    <tr>
+                        <td><strong>tags</strong></td>
+                        <td>id, name, created_at</td>
+                    </tr>
+                    <tr>
+                        <td><strong>archive_tags</strong></td>
+                        <td>id, archive_id, tag_id</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="slide-footer">6 / 6</div>
+    </section>
+
+</div>
+
+<div class="marp-osc">
+    <button class="marp-osc-btn" id="oscPrev" title="이전 슬라이드">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <span class="marp-osc-text" id="oscPageText">Page 1 of 6</span>
+
+    <button class="marp-osc-btn" id="oscNext" title="다음 슬라이드">
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+
+    <button class="marp-osc-btn" id="oscFull" title="전체 화면 토글">
+        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+
+    <button class="marp-osc-btn" id="oscOverview" title="전체 개요 보기 (O)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    </button>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        const parentContainer = document.getElementById('slideParent');
+        const slideElements = Array.from(parentContainer.getElementsByClassName('bespoke-marp-slide'));
+        const oscPageText = document.getElementById('oscPageText');
+        let activeIndex = 0;
+        let overviewMode = false;
+
+        function renderState() {
+            slideElements.forEach((slide, index) => {
+                if (index === activeIndex) {
+                    slide.classList.add('bespoke-marp-active');
+                    if (overviewMode) slide.focus();
+                } else {
+                    slide.classList.remove('bespoke-marp-active');
+                }
+            });
+            if (oscPageText) {
+                oscPageText.textContent = `Page ${activeIndex + 1} of ${slideElements.length}`;
+            }
+        }
+
+        function navigateNext() {
+            if (activeIndex < slideElements.length - 1) {
+                activeIndex++;
+                renderState();
+            }
+        }
+
+        function navigatePrev() {
+            if (activeIndex > 0) {
+                activeIndex--;
+                renderState();
+            }
+        }
+
+        function toggleOverviewMode() {
+            overviewMode = !overviewMode;
+            if (overviewMode) {
+                parentContainer.classList.add('bespoke-marp-overview');
+            } else {
+                parentContainer.classList.remove('bespoke-marp-overview');
+            }
+            renderState();
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.getElementById('oscPrev').addEventListener('click', navigatePrev);
+        document.getElementById('oscNext').addEventListener('click', navigateNext);
+        document.getElementById('oscOverview').addEventListener('click', toggleOverviewMode);
+        document.getElementById('oscFull').addEventListener('click', toggleFullScreen);
+
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'ArrowRight':
+                case 'Space':
+                case 'PageDown':
+                    event.preventDefault();
+                    navigateNext();
+                    break;
+                case 'ArrowLeft':
+                case 'PageUp':
+                    event.preventDefault();
+                    navigatePrev();
+                    break;
+                case 'Home':
+                    event.preventDefault();
+                    activeIndex = 0;
+                    renderState();
+                    break;
+                case 'End':
+                    event.preventDefault();
+                    activeIndex = slideElements.length - 1;
+                    renderState();
+                    break;
+                case 'o':
+                case 'O':
+                case 'Escape':
+                    event.preventDefault();
+                    toggleOverviewMode();
+                    break;
+            }
+        });
+
+        let lastScrollTimestamp = Date.now();
+        parentContainer.addEventListener('wheel', function(event) {
+            const currentTimestamp = Date.now();
+            if (currentTimestamp - lastScrollTimestamp < 250) return;
+
+            if (event.deltaY > 0) {
+                navigateNext();
+                lastScrollTimestamp = currentTimestamp;
+            } else if (event.deltaY < 0) {
+                navigatePrev();
+                lastScrollTimestamp = currentTimestamp;
+            }
+        });
+
+        slideElements.forEach((slide, mapIndex) => {
+            slide.addEventListener('click', function() {
+                if (overviewMode) {
+                    activeIndex = mapIndex;
+                    toggleOverviewMode();
+                }
+            });
+        });
+
+        renderState();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Movie Archive 프로젝트 제안서</title>
+    <style>
+        /* ==========================================================================
+           1. Marp 프레젠테이션 엔진 코어 스타일 (Bespoke 아키텍처)
+           ========================================================================== */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a; /* Slate 900 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* 슬라이드 parent 컨테이너 */
+        .bespoke-marp-parent {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #020617; /* Slate 950 */
+        }
+
+        /* 개별 슬라이드 규격 (Marp 표준 16:9 뷰포트 고정 및 SVG 가상화 시뮬레이션) */
+        .bespoke-marp-slide {
+            position: absolute;
+            width: 1280px;
+            height: 720px;
+            box-sizing: border-box;
+            padding: 60px 90px;
+            background-color: #ffffff;
+            color: #1e293b;
+            /* 화면이 안 보이는 현상을 막기 위해 display: none으로 안전하게 기본 숨김 처리 */
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* 활성화된 슬라이드 상태 */
+        .bespoke-marp-slide.bespoke-marp-active {
+            display: flex; /* 활성화되었을 때 중앙에 정상 노출 */
+        }
+
+        /* 하단 페이지네이션 번호 */
+        .slide-footer {
+            position: absolute;
+            bottom: 40px;
+            right: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            z-index: 10;
+        }
+
+        /* ==========================================================================
+           2. Marp 순정 하단 네비게이션 컨트롤 바 (OSC) 디자인
+           ========================================================================== */
+        .marp-osc {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 9999;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            user-select: none;
+        }
+        .marp-osc-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .marp-osc-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        .marp-osc-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .marp-osc-text {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* ==========================================================================
+           3. 사용자 정의 타이포그래피 스타일 (제공해주신 스펙 반영)
+           ========================================================================== */
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0f172a;    /* Slate 900 */
+            border-bottom: none;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0f172a;    /* Slate 900 */
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        p, li {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #334155;    /* Slate 700 */
+            text-align: justify;
+        }
+        ul {
+            margin-top: 0;
+            margin-left: 20px;
+            margin-bottom: 16px;
+            padding-left: 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        blockquote {
+            background: transparent;
+            border-left: 4px solid #cbd5e1; /* Slate 300 */
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #64748b;    /* Slate 500 */
+            font-style: italic;
+        }
+
+        /* ==========================================================================
+           4. 테이블 및 컴포넌트 추가 확장 디자인
+           ========================================================================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 15px;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: bold;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+
+        /* 다단 레이아웃 분할 배정 구조 */
+        .split-container {
+            display: flex;
+            gap: 40px;
+            margin-top: 10px;
+        }
+        .split-column {
+            flex: 1;
+        }
+
+        /* 대제목 표지 슬라이드 전용 데코레이션 스타일 (첫 페이지 하얀색 배경 통일 설정) */
+        .slide-cover {
+            background: #ffffff; /* 하얀색 배경으로 통일 */
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 120px;
+        }
+        .slide-cover h1 {
+            color: #0f172a; /* 흰 배경에 맞추어 Slate 900 어두운 색상 처리 */
+            font-size: 52px;
+            margin-bottom: 10px;
+        }
+        .slide-cover h2 {
+            color: #0284c7; /* 흰 배경 가독성을 위한 오션 블루 계열 처리 */
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+        .slide-cover blockquote {
+            border-left-color: #0284c7;
+            color: #475569; /* 흰 배경용 Slate 600 처리 */
+            font-size: 18px;
+            max-width: 800px;
+        }
+
+        /* 저장소 링크 전용 박스 */
+        .link-box {
+            background-color: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        .link-box a {
+            color: #0284c7;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 18px;
+            text-decoration: none;
+        }
+        .link-box a:hover {
+            text-decoration: underline;
+        }
+
+        /* ==========================================================================
+           5. Marp Overview (전체 개요 보기) 대시보드 모드 스타일
+           ========================================================================== */
+        .bespoke-marp-overview {
+            overflow-y: auto !important;
+            background-color: #0f172a !important;
+            padding: 50px !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)) !important;
+            gap: 30px !important;
+        }
+        .bespoke-marp-overview .bespoke-marp-slide {
+            display: flex !important; /* 개요 모드에서는 전체 그리드로 한눈에 노출 */
+            position: relative !important;
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 16 / 9 !important;
+            padding: 25px 35px !important;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        /* 개요 모드 내 폰트 다운스케일링 */
+        .bespoke-marp-overview .bespoke-marp-slide h1 { font-size: 20px; margin-bottom: 10px; }
+        .bespoke-marp-overview .bespoke-marp-slide h2 { font-size: 14px; margin-top: 10px; margin-bottom: 5px; }
+        .bespoke-marp-overview .bespoke-marp-slide p,
+        .bespoke-marp-overview .bespoke-marp-slide li,
+        .bespoke-marp-overview .bespoke-marp-slide td,
+        .bespoke-marp-overview .bespoke-marp-slide th { font-size: 10px; line-height: 1.4; }
+        .bespoke-marp-overview .bespoke-marp-slide blockquote { font-size: 11px; padding-left: 8px; margin: 8px 0;}
+        .bespoke-marp-overview .bespoke-marp-slide table { margin: 5px 0; }
+        .bespoke-marp-overview .bespoke-marp-slide th,
+        .bespoke-marp-overview .bespoke-marp-slide td { padding: 4px 6px; }
+        .bespoke-marp-overview .bespoke-marp-slide .link-box { padding: 5px 10px; margin-top: 5px;}
+        .bespoke-marp-overview .bespoke-marp-slide .link-box a { font-size: 10px; }
+        .bespoke-marp-overview .bespoke-marp-slide .split-container { gap: 15px; }
+        .bespoke-marp-overview .bespoke-marp-slide.bespoke-marp-active {
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+<div class="bespoke-marp-parent" id="slideParent">
+
+    <section class="bespoke-marp-slide slide-cover">
+        <h2># 1 — 프로젝트 소개</h2>
+        <h1>🎬 Movie Archive</h1>
+        <blockquote>
+            내가 본 영화를 기록하고, 리뷰와 별점을 남기는, 영화 아카이브 서비스
+        </blockquote>
+        <div class="slide-footer">1 / 4</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>1 — 프로젝트 소개</h1>
+        <div class="split-container">
+            <div class="split-column">
+                <h2>project 목적</h2>
+                <ul>
+                    <li>세대 제한 없는 유니버설 디자인 기반의 전 연령층 유저 타깃 시스템 정의</li>
+                    <li>감상 이력의 영구 보존을 위한 맞춤형 히스토리 관리 체계 구성</li>
+                    <li>JAVA 핵심 메커니즘을 활용한 시네마틱 라이프 아카이빙 플랫폼 개발</li>
+                </ul>
+            </div>
+            <div class="split-column">
+                <h2>기대 효과</h2>
+                <ul>
+                    <li>JAVA의 객체 지향 프로그래밍 핵심 개념(상속, 다형성, 캡슐화 등)을 실제 비즈니스 로직에 적용함으로써 이론적 지식을 실무 지향적 개발 역량으로 승화</li>
+                    <li>데이터의 생성, 조회, 수정, 삭제 프로세스를 직접 설계하며 안정적인 백엔드 아키텍처 및 데이터 흐름 제어 능력 확보</li>
+                    <li>영화, 유저, 리뷰 등 서비스의 핵심 엔티티를 독립된 객체로 설계하고 인터페이스를 통해 모듈화함으로써, 코드의 재사용성과 유지보수성을 극대화하는 소프트웨어 디자인 체득</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">2 / 4</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>2 — 프로젝트 배경 및 범위</h1>
+
+        <h2>프로젝트 배경</h2>
+        <p>
+            OTT 플랫폼의 폭발적인 성장으로 인류 역사상 그 어느 때보다 많은 영상 미디어를 소비하고 있습니다. 그러나 역설적으로 콘텐츠 소비 속도가 빨라지면서, 영화를 본 후 느낀 깊은 영감과 정서적 감동이 기록되지 못한 채 빠르게 휘발되는 문제가 발생하고 있습니다. 이에 남녀노소 누구나 자신의 영화적 경험을 쉽고 직관적으로 기록하고, 오랫동안 아카이빙할 수 있는 공간의 필요성을 절감했습니다.
+        </p>
+
+        <div class="split-container">
+            <div class="split-column">
+                <h2>프로젝트 범위</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width: 50%;">포함 (In-Scope)</th>
+                        <th style="width: 50%;">제외 (Out-of-Scope)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>회원가입 & 로그인</td>
+                        <td>고급 보안 처리</td>
+                    </tr>
+                    <tr>
+                        <td>영화 목록 관리 및 조회</td>
+                        <td>외부 API 오픈 연동</td>
+                    </tr>
+                    <tr>
+                        <td>리뷰 작성 & 별점 부여</td>
+                        <td>다국어 로컬라이징 지원</td>
+                    </tr>
+                    <tr>
+                        <td>시스템 관리자 기능</td>
+                        <td>유저 간 팔로우 기능</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="split-column">
+                <h2>사용 기술 스택</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width: 35%;">분류</th>
+                        <th style="width: 65%;">기술 및 도구 (Tech / Tool)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>Backend</strong></td>
+                        <td>Java 17</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UI</strong></td>
+                        <td>Java Swing)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database</strong></td>
+                        <td>SQLite</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frontend</strong></td>
+                        <td>HTML5 / JavaScript</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VCS</strong></td>
+                        <td>Git & GitHub</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="slide-footer">3 / 4</div>
+    </section>
+
+    <section class="bespoke-marp-slide">
+        <h1>3 — 팀 구성 및 Github 저장소</h1>
+
+        <h2>팀 구성원 및 역할 분담</h2>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 15%;">이름</th>
+                <th style="width: 20%;">학번</th>
+                <th style="width: 65%;">역할 및 주요 수행 업무</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><strong>최영재</strong></td>
+                <td>20220519</td>
+                <td>백엔드, DB 설계, Domain/DAO/Service 구현, 테스트</td>
+            </tr>
+            <tr>
+                <td><strong>남하경</strong></td>
+                <td>20240609</td>
+                <td>프론트엔드, Controller, Swing GUI 구현, 통합 테스트</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2>저장소 URL 공유</h2>
+        <div class="link-box">
+            <a href="https://github.com/asjjma-cloud/movie-archive.git" target="_blank">
+                🔗 https://github.com/asjjma-cloud/movie-archive.git
+            </a>
+        </div>
+        <div class="slide-footer">4 / 4</div>
+    </section>
+
+</div>
+
+<div class="marp-osc">
+    <button class="marp-osc-btn" id="oscPrev" title="이전 슬라이드">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <span class="marp-osc-text" id="oscPageText">Page 1 of 4</span>
+
+    <button class="marp-osc-btn" id="oscNext" title="다음 슬라이드">
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+
+    <button class="marp-osc-btn" id="oscFull" title="전체 화면 토글">
+        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+
+    <button class="marp-osc-btn" id="oscOverview" title="전체 개요 보기 (O)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    </button>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        const parentContainer = document.getElementById('slideParent');
+        const slideElements = Array.from(parentContainer.getElementsByClassName('bespoke-marp-slide'));
+        const oscPageText = document.getElementById('oscPageText');
+        let activeIndex = 0;
+        let overviewMode = false;
+
+        // 슬라이드 가시성 및 활성화 클래스 스위칭 장치
+        function renderState() {
+            slideElements.forEach((slide, index) => {
+                if (index === activeIndex) {
+                    slide.classList.add('bespoke-marp-active');
+                    if (overviewMode) slide.focus();
+                } else {
+                    slide.classList.remove('bespoke-marp-active');
+                }
+            });
+            // 하단 컨트롤 바의 페이지 상태 텍스트 실시간 연동 처리
+            if (oscPageText) {
+                oscPageText.textContent = `Page ${activeIndex + 1} of ${slideElements.length}`;
+            }
+        }
+
+        // 앞/뒤 네비게이션 트리거
+        function navigateNext() {
+            if (activeIndex < slideElements.length - 1) {
+                activeIndex++;
+                renderState();
+            }
+        }
+
+        function navigatePrev() {
+            if (activeIndex > 0) {
+                activeIndex--;
+                renderState();
+            }
+        }
+
+        // Overview 전체보기 레이아웃 대시보드 제어 토글
+        function toggleOverviewMode() {
+            overviewMode = !overviewMode;
+            if (overviewMode) {
+                parentContainer.classList.add('bespoke-marp-overview');
+            } else {
+                parentContainer.classList.remove('bespoke-marp-overview');
+            }
+            renderState();
+        }
+
+        // 브라우저 네이티브 전체화면 제어 기능
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        /* 하단 OSC 컨트롤 바 클릭 이벤트 제어 연동 */
+        document.getElementById('oscPrev').addEventListener('click', navigatePrev);
+        document.getElementById('oscNext').addEventListener('click', navigateNext);
+        document.getElementById('oscOverview').addEventListener('click', toggleOverviewMode);
+        document.getElementById('oscFull').addEventListener('click', toggleFullScreen);
+
+        /* ----------------------------------------------------------------------
+         * 키보드 핫키 매핑 기능 구현
+         * ---------------------------------------------------------------------- */
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'ArrowRight':
+                case 'Space':
+                case 'PageDown':
+                    event.preventDefault();
+                    navigateNext();
+                    break;
+                case 'ArrowLeft':
+                case 'PageUp':
+                    event.preventDefault();
+                    navigatePrev();
+                    break;
+                case 'Home':
+                    event.preventDefault();
+                    activeIndex = 0;
+                    renderState();
+                    break;
+                case 'End':
+                    event.preventDefault();
+                    activeIndex = slideElements.length - 1;
+                    renderState();
+                    break;
+                case 'o':
+                case 'O':
+                case 'Escape':
+                    event.preventDefault();
+                    toggleOverviewMode();
+                    break;
+            }
+        });
+
+        /* ----------------------------------------------------------------------
+         * 마우스 휠 스크롤 가속 버퍼 락(Lock) 제어
+         * ---------------------------------------------------------------------- */
+        let lastScrollTimestamp = Date.now();
+        parentContainer.addEventListener('wheel', function(event) {
+            const currentTimestamp = Date.now();
+            if (currentTimestamp - lastScrollTimestamp < 250) return; // 250ms 가속 무시 고정
+
+            if (event.deltaY > 0) {
+                navigateNext();
+                lastScrollTimestamp = currentTimestamp;
+            } else if (event.deltaY < 0) {
+                navigatePrev();
+                lastScrollTimestamp = currentTimestamp;
+            }
+        });
+
+        /* ----------------------------------------------------------------------
+         * Overview 개요 화면 내 각 썸네일 클릭 시 확대 탐색 매핑
+         * ---------------------------------------------------------------------- */
+        slideElements.forEach((slide, mapIndex) => {
+            slide.addEventListener('click', function() {
+                if (overviewMode) {
+                    activeIndex = mapIndex;
+                    toggleOverviewMode();
+                }
+            });
+        });
+
+        // 엔진 초기 구동 활성화
+        renderState();
+    })();
+</script>
+</body>
+</html>
