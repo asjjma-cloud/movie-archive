@@ -22,15 +22,21 @@ public class ReviewDAO {
         }
     }
 
-    // 영화별 리뷰 전체 조회
+    // 영화별 리뷰 전체 조회 (닉네임 포함)
     public List<Review> findByMovieId(int movieId) throws SQLException {
-        String sql = "SELECT * FROM reviews WHERE movie_id = ? ORDER BY created_at DESC";
+        String sql = "SELECT r.*, u.nickname FROM reviews r " +
+                "JOIN users u ON r.user_id = u.id " +
+                "WHERE r.movie_id = ? ORDER BY r.created_at DESC";
         List<Review> reviews = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, movieId);
             ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) reviews.add(mapRow(rs));
+            while (rs.next()) {
+                Review review = mapRow(rs);
+                review.setNickname(rs.getString("nickname"));
+                reviews.add(review);
+            }
         }
         return reviews;
     }

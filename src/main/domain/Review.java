@@ -8,6 +8,7 @@ public class Review {
     private String content;
     private String createdAt;
     private String updatedAt;
+    private String nickname;
 
     // 생성자 (DB에서 불러올 때)
     public Review(int id, int userId, int movieId,
@@ -38,9 +39,13 @@ public class Review {
     public String getContent() { return content; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
+    public String getNickname() { return nickname; }
 
     // Setter
     public void setId(int id) { this.id = id; }
+    public void setRating(int rating) { this.rating = rating; }
+    public void setContent(String content) { this.content = content; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 
     // 리뷰 수정
     public void update(int rating, String content) {

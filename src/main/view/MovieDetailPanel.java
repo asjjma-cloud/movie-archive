@@ -114,7 +114,7 @@ public class MovieDetailPanel extends JDialog {
         reviewTitle.setForeground(TEXT_COLOR);
         headerPanel.add(reviewTitle);
 
-        String[] columns = {"ID", "작성자 ID", "별점", "내용", "작성일"};
+        String[] columns = {"ID", "닉네임", "별점", "내용", "작성일"};
         reviewTableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -131,12 +131,12 @@ public class MovieDetailPanel extends JDialog {
         reviewTable.getTableHeader().setForeground(HINT_COLOR);
         reviewTable.getTableHeader().setFont(new Font("Dialog", Font.PLAIN, 12));
 
+        // ID 컬럼 숨기기
         reviewTable.getColumnModel().getColumn(0).setMinWidth(0);
         reviewTable.getColumnModel().getColumn(0).setMaxWidth(0);
-        reviewTable.getColumnModel().getColumn(1).setMinWidth(0);
-        reviewTable.getColumnModel().getColumn(1).setMaxWidth(0);
+        reviewTable.getColumnModel().getColumn(1).setPreferredWidth(100);
         reviewTable.getColumnModel().getColumn(2).setPreferredWidth(60);
-        reviewTable.getColumnModel().getColumn(3).setPreferredWidth(350);
+        reviewTable.getColumnModel().getColumn(3).setPreferredWidth(300);
         reviewTable.getColumnModel().getColumn(4).setPreferredWidth(120);
 
         JScrollPane scrollPane = new JScrollPane(reviewTable);
@@ -165,7 +165,6 @@ public class MovieDetailPanel extends JDialog {
         writeReviewBtn.addActionListener(e -> {
             new ReviewDialog(this, movie, authController, reviewController);
             loadReviews();
-            // 평균 별점 즉시 갱신
             Movie updated = movieController.getMovieDetail(movie.getId());
             if (updated != null) {
                 movie.setAverageRating(updated.getAverageRating());
@@ -183,7 +182,7 @@ public class MovieDetailPanel extends JDialog {
         closeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         closeBtn.addActionListener(e -> {
             dispose();
-            mainFrame.showMovieList(); // 닫을 때 영화 목록 갱신
+            mainFrame.showMovieList();
         });
 
         panel.add(writeReviewBtn);
@@ -198,7 +197,7 @@ public class MovieDetailPanel extends JDialog {
         for (Review r : reviews) {
             reviewTableModel.addRow(new Object[]{
                     r.getId(),
-                    r.getUserId(),
+                    r.getNickname() != null ? r.getNickname() : "알 수 없음",
                     r.getRating() + " ★",
                     r.getContent(),
                     r.getCreatedAt()
